@@ -1,21 +1,34 @@
 class Result {
     constructor(){
-        this.id = null;
-        this.identificacion = null;
-        this.nombre = null;
-        this.apellido1 = null;
-        this.apellido2 = null;
-        this.sexo = null;
-        this.fecha_nacimiento = null;
+        // Datos
+        this.identificacion = "";
+        this.nombre = "";
+        this.apellido1 = "";
+        this.apellido2 = "";
+        this.sexo = "H";
+        this.fecha_nacimiento = "";
+        this.edad_inclusion = 0;
+        this.peso = 0;	
+        this.altura = 0;	
+        this.IMC = 0;	
+        this.perimetro = 0;
+        this.torax = 0;
+        this.perimetro_abd = 0;
+        this.pectus_normal = "";
+        this.TAS_MSD = "";
+        this.TAD_MSD = "";	
+        this.TAS_MSI = "";
+        this.TAD_MSI = "";
+        this.expl_patolog = "";
 
         // TTO
-        this.IECA = null;
-        this.cual_IECA = null;
-        this.dosis_IECA = null;
-        this.ARA_II = null;
-        this.cual_ARA_II = null;
-        this.dosis_ARA_II = null;
-        this.DIU_TIAZ = null;
+        this.IECA = 0;
+        this.cual_IECA = "";
+        this.dosis_IECA = "";
+        this.ARA_II = 0;
+        this.cual_ARA_II = "";
+        this.dosis_ARA_II = "";
+        this.DIU_TIAZ = 0;
         this.cual_DIU_TAIZ = null;
         this.dosis_DIU_TIAZ = null;
         this.ACA_DHP = null;
@@ -180,20 +193,7 @@ class Result {
         this.renal_estudio = null;
         this.patologia_renal = null;
 
-        // Datos
-        this.inclusion = null;
-        this.peso = null;	
-        this.altura = null;	
-        this.IMC = null;	
-        this.perimetro = null; 
-        this.torax = null;	
-        this.perimetro_abd = null;	
-        this.pectus_normal = null;
-        this.TAS_MSD = null;	
-        this.TAD_MSD = null;	
-        this.TAS_MSI = null;	
-        this.TAD_MSI = null;	
-        this.expl_patolog = null;
+        
     }
 }
 

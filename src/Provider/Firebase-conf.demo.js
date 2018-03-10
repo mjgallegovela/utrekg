@@ -1,4 +1,4 @@
-const config = {
+const Config = {
     apiKey: "",
     authDomain: "",
     databaseURL: "",
@@ -7,4 +7,4 @@ const config = {
     messagingSenderId: ""
 };
 
-export default config;
+export default Config;

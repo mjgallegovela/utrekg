@@ -10,14 +10,14 @@
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
-import { fbAuth } from '../Provider/Firebase';
+//import { fbAuth } from '../Provider/Firebase';
 
-const PrivateRoute = ({ component: Component, ...rest }) => (
+const PrivateRoute = ({ component: Component, fb: Fb, ...rest }) => (
   <Route
     {...rest}
-    render={props =>
-      fbAuth.currentUser !== null ? (
-        <Component {...props} />
+    render={props => {
+      return Fb.auth().currentUser !== null ? (
+        <Component fb={Fb} {...props} />
       ) : (
         <Redirect
           to={{
@@ -26,6 +26,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
         />
       )
     }
+  }
   />
 );
 

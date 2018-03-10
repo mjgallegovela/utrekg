@@ -1,0 +1,35 @@
+.tab-content {
+    margin-left: 0 !important;
+    border-left: 1px solid #222;
+    padding: 10px;
+}
+.nav.nav-tabs {
+    border-color: #222;
+}
+
+.nav.nav-tabs > li > a {
+    border: 1px solid #222;
+    color: #222;
+    background-color: #ddd;
+}
+
+.nav.nav-tabs > li.active > a {
+    background-color: white;
+    border-bottom-color: transparent;   
+}
+
+.modal-info .modal-content {
+    background-color: #d9edf7;
+}
+
+.modal-success .modal-content {
+    background-color: #dff0d8;
+}
+
+.modal-danger .modal-content {
+    background-color: #f2dede;
+}
+
+.modal-warning .modal-content {
+    background-color: #fcf8e3;
+}

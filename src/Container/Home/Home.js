@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {Link} from 'react-router-dom';
 
 import Navigation from '../../Component/Navigation';
 import List from '../../Component/List/List';
@@ -9,10 +8,11 @@ import Detail from '../../Component/Detail/Detail';
 import './Home.css';
 
 class HomePage extends Component {
+  
   render() {
     return (
       <div className="container">
-        <Navigation/>
+        <Navigation fb={this.props.fb}/>
         {
           (this.props.match.params.page === 'list' || this.props.match.params.page === 'home')? ( 
             <div>
@@ -21,17 +21,16 @@ class HomePage extends Component {
                   Listado de usuarios
                 </h3>
               </div>
-              <List />
+              <List fb={this.props.fb}/>
             </div>
-          ) : (this.props.match.params.page === 'detail' 
-            && this.props.match.params.id !== undefined) ? (
+          ) : (this.props.match.params.page === 'detail') ? (
             <div>
               <div className="pageTitle">
                 <h3 className={'teal-text'}>
                   Editar usuario
                 </h3>
               </div>
-              <Detail exists="true" id={this.props.match.params.id}/>
+              <Detail fb={this.props.fb} exists="true" id={this.props.match.params.id}/>
             </div>
           ) : (
             <div>
@@ -40,7 +39,7 @@ class HomePage extends Component {
                   Nuevo usuario
                 </h3>
               </div>
-              <Detail exists="false"/>
+              <Detail fb={this.props.fb} exists="false"/>
             </div>
           )
         }
