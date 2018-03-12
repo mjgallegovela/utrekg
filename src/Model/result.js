@@ -35,7 +35,6 @@ class Result {
         this.cual_ACA_DHP = "";
         this.dosis_ACA_DHP = 0;
         this.verap_dilt = 0;
-        this.cual_verap_dilt = "";
         this.dosis_verap_dilt = 0;
         this.alfabloq = 0;
         this.cual_alfabloq = "";
