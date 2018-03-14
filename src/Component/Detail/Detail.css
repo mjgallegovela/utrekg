@@ -1,3 +1,6 @@
+.row.btns {
+    margin-bottom: 20px
+}
 .tab-content {
     margin-left: 0 !important;
     border-left: 1px solid #222;

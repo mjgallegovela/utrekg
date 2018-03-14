@@ -148,8 +148,10 @@ export default class Detail extends React.Component {
                         )}
                     </Modal>
                 </div>
-                <div className="text-right">
-                    <Button bsStyle="success" onClick={this.save}>Guardar</Button>
+                <div className="row btns">
+                    <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
+                        <Button bsStyle="success" block="true" onClick={this.save}>Guardar</Button>
+                    </div>
                 </div>
                 <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
                     <NavItem eventKey="1">
@@ -171,8 +173,9 @@ export default class Detail extends React.Component {
                         PRUEBAS
                     </NavItem>
                 </Nav>
+                
                 {this.state.tabkey === "1" && (
-                    <div className=" tab-content">
+                    <div className="tab-content">
                         <div className='row'>
                             <div className="col-xs-12">
                                 <FieldGroup
@@ -221,20 +224,6 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <FormGroup controlId="formControlsSelect">
                                     <ControlLabel>Fecha de nacimiento</ControlLabel>
-                                    {/*}
-                                    <DatePicker 
-                                        name="fecha_nacimiento" 
-                                        weekStartsOn={1} 
-                                        id="fechaNacimientoInput" 
-                                        value={this.state.result.fecha_nacimiento} 
-                                        onChange={
-                                            (isoString, inputValue) => {
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_nacimiento = isoString;
-                                                this.setState({result: stateResult});
-                                            }} 
-                                        />
-                                        */}
                                     <DatePicker 
                                         value={this.state.result.fecha_nacimiento} 
                                         onChange={
@@ -392,7 +381,6 @@ export default class Detail extends React.Component {
                     </div>
                 )}
                 {this.state.tabkey === "2" && (
-                    /* TTO */
                     <div className="tab-content">
                         <div className='row'>
                             <div className="col-xs-12 col-sm-6 col-md-4">
@@ -836,6 +824,627 @@ export default class Detail extends React.Component {
                         </div>
                     </div>
                 )}
+                {this.state.tabkey === "3" && (
+                    /* ECG */
+                    <div className="tab-content">
+                    <div className='row'>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FormGroup controlId="formControlsSelect">
+                                <ControlLabel>Fecha del ECG</ControlLabel>
+                                <DatePicker 
+                                    value={this.state.result.fecha_ECG} 
+                                    onChange={
+                                        (isoString) => {
+                                            console.log(isoString);
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_ECG = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </FormGroup>
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="sexoInput" 
+                                label="Ritmo"
+                                value={this.state.result.ritmo} 
+                                onChange={this.handleValueChange}
+                                name='ritmo'
+                                options={[
+                                    {value: 0, label: "Ritmo sinusal normal"},
+                                    {value: 1, label: "FA"},
+                                    {value: 2, label: "Flutter"},
+                                    {value: 3, label: "Taquicardia auricular"}
+                                ]}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="FCInput"
+                                type="number"
+                                label="FC"
+                                placeholder="FC"
+                                onChange={this.handleValueChange}
+                                name='FC'
+                                value={this.state.result.FC}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="PRInput"
+                                type="number"
+                                label="PR"
+                                placeholder="PR"
+                                onChange={this.handleValueChange}
+                                name='PR'
+                                value={this.state.result.PR}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="QRSInput"
+                                type="number"
+                                label="QRS"
+                                placeholder="QRS"
+                                onChange={this.handleValueChange}
+                                name='QRS'
+                                value={this.state.result.QRS}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="QTcInput"
+                                type="number"
+                                label="QTc"
+                                placeholder="QTc"
+                                onChange={this.handleValueChange}
+                                name='QTc'
+                                value={this.state.result.QTc}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="EjePInput"
+                                type="number"
+                                label="Eje P"
+                                placeholder="Eje P"
+                                onChange={this.handleValueChange}
+                                name='EJE_P'
+                                value={this.state.result.EJE_P}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="EjeQRSInput"
+                                type="number"
+                                label="Eje QRS"
+                                placeholder="Eje QRS"
+                                onChange={this.handleValueChange}
+                                name='EJE_QRS'
+                                value={this.state.result.EJE_QRS}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="EjeQRSInput"
+                                type="number"
+                                label="Eje T"
+                                placeholder="Eje T"
+                                onChange={this.handleValueChange}
+                                name='EJE_T'
+                                value={this.state.result.EJE_T}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="P_alturaInput"
+                                type="number"
+                                label="P Altura"
+                                placeholder="P Altura"
+                                onChange={this.handleValueChange}
+                                name='P_altura'
+                                value={this.state.result.P_altura}
+                                />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="P_melladaInput" 
+                                label="P Mellada"
+                                value={this.state.result.P_mellada} 
+                                onChange={this.handleValueChange}
+                                name='P_mellada'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="P_en_V1_1mmInput" 
+                                label="P en V1 > 1mm"
+                                value={this.state.result.P_en_V1_1mm} 
+                                onChange={this.handleValueChange}
+                                name='P_en_V1_1mm'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="Q_patologicaInput" 
+                                label="Q Patológica"
+                                value={this.state.result.Q_patologica} 
+                                onChange={this.handleValueChange}
+                                name='Q_patologica'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="Q_I_y_aVL_no_patologInput" 
+                                label="Q I y aVL no patológica"
+                                value={this.state.result.Q_I_y_aVL_no_patolog} 
+                                onChange={this.handleValueChange}
+                                name='Q_I_y_aVL_no_patolog'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="Q_inferior_no_patologInput" 
+                                label="Q  inferior no patológica"
+                                value={this.state.result.Q_inferior_no_patolog} 
+                                onChange={this.handleValueChange}
+                                name='Q_inferior_no_patolog'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="Q_V3_4_no_patologInput" 
+                                label="Q V3-4 no patológica"
+                                value={this.state.result.Q_V3_4_no_patolog} 
+                                onChange={this.handleValueChange}
+                                name='Q_V3_4_no_patolog'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="Q_V5_6_no_patologInput" 
+                                label="Q V5-6 no patológica"
+                                value={this.state.result.Q_V5_6_no_patolog} 
+                                onChange={this.handleValueChange}
+                                name='Q_V5_6_no_patolog'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="muesca_inf_QRSInput" 
+                                label="Muesca Inferior QRS"
+                                value={this.state.result.muesca_inf_QRS} 
+                                onChange={this.handleValueChange}
+                                name='muesca_inf_QRS'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="muesca_lat_QRSInput" 
+                                label="Muesca Lateral QRS"
+                                value={this.state.result.muesca_lat_QRS} 
+                                onChange={this.handleValueChange}
+                                name='muesca_lat_QRS'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="muesca_ant_QRSInput" 
+                                label="Muesca Anterior QRS"
+                                value={this.state.result.muesca_ant_QRS} 
+                                onChange={this.handleValueChange}
+                                name='muesca_ant_QRS'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"}
+                                ]}
+                                />    
+                        </div>
+                    </div>
+                    <div className="row">    
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_I_Input"
+                                type="number"
+                                label="R en I"
+                                placeholder="R en I"
+                                onChange={this.handleValueChange}
+                                name='R_en_I'
+                                value={this.state.result.R_en_I}
+                            />
+                        </div>   
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_III_Input"
+                                type="number"
+                                label="R en III"
+                                placeholder="R en III"
+                                onChange={this.handleValueChange}
+                                name='R_en_III'
+                                value={this.state.result.R_en_III}
+                            />
+                        </div>  
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_aVF_Input"
+                                type="number"
+                                label="R en aVF"
+                                placeholder="R en aVF"
+                                onChange={this.handleValueChange}
+                                name='R_en_aVF'
+                                value={this.state.result.R_en_aVF}
+                            />
+                        </div>   
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_aVL_Input"
+                                type="number"
+                                label="R en aVL"
+                                placeholder="R en aVL"
+                                onChange={this.handleValueChange}
+                                name='R_en_aVL'
+                                value={this.state.result.R_en_aVL}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_V2_Input"
+                                type="number"
+                                label="R en V2"
+                                placeholder="R en V2"
+                                onChange={this.handleValueChange}
+                                name='R_en_V2'
+                                value={this.state.result.R_en_V2}
+                            />
+                        </div>      
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_V5_Input"
+                                type="number"
+                                label="R en V5"
+                                placeholder="R en V5"
+                                onChange={this.handleValueChange}
+                                name='R_en_V5'
+                                value={this.state.result.R_en_V5}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="R_en_V6_Input"
+                                type="number"
+                                label="R en V6"
+                                placeholder="R en V6"
+                                onChange={this.handleValueChange}
+                                name='R_en_V6'
+                                value={this.state.result.R_en_V6}
+                            />
+                        </div>   
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_I_Input"
+                                type="number"
+                                label="S en I"
+                                placeholder="S en I"
+                                onChange={this.handleValueChange}
+                                name='S_en_I'
+                                value={this.state.result.S_en_I}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_II_Input"
+                                type="number"
+                                label="S en II"
+                                placeholder="S en II"
+                                onChange={this.handleValueChange}
+                                name='S_en_II'
+                                value={this.state.result.S_en_II}
+                            />
+                        </div>  
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_III_Input"
+                                type="number"
+                                label="S en III"
+                                placeholder="S en III"
+                                onChange={this.handleValueChange}
+                                name='S_en_III'
+                                value={this.state.result.S_en_III}
+                            />
+                        </div>  
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_V1_Input"
+                                type="number"
+                                label="S en V1"
+                                placeholder="S en V1"
+                                onChange={this.handleValueChange}
+                                name='S_en_V1'
+                                value={this.state.result.S_en_V1}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_V3_Input"
+                                type="number"
+                                label="S en V3"
+                                placeholder="S en V3"
+                                onChange={this.handleValueChange}
+                                name='S_en_V3'
+                                value={this.state.result.S_en_V3}
+                            />
+                        </div>  
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="S_en_V6_Input"
+                                type="number"
+                                label="S en V6"
+                                placeholder="S en V6"
+                                onChange={this.handleValueChange}
+                                name='S_en_V6'
+                                value={this.state.result.S_en_V6}
+                            />
+                        </div>  
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="bloqueos_ramaInput" 
+                                label="Bloqueos Rama"
+                                value={this.state.result.bloqueos_rama} 
+                                onChange={this.handleValueChange}
+                                name='bloqueos_rama'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "BIRIHH"},
+                                    {value: 2, label: "BCRIHH"},
+                                    {value: 3, label: "BIRDHH"},
+                                    {value: 4, label: "BCRDHH"}
+                                ]}
+                                />    
+                        </div>        
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="hemibloqueosInput" 
+                                label="Hemibloqueos"
+                                value={this.state.result.hemibloqueos} 
+                                onChange={this.handleValueChange}
+                                name='hemibloqueos'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "HIA"},
+                                    {value: 2, label: "HIP"},
+                                ]}
+                                />    
+                        </div>        
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="Sokolow_Input"
+                                type="number"
+                                label="Indice de Sokolow"
+                                placeholder="Indice de Sokolow"
+                                onChange={this.handleValueChange}
+                                name='Sokolow'
+                                value={this.state.result.Sokolow}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="Lyon_Input"
+                                type="number"
+                                label="Indice de Lyon"
+                                placeholder="Indice de Lyon"
+                                onChange={this.handleValueChange}
+                                name='Lyon'
+                                value={this.state.result.Lyon}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="Cornell_Input"
+                                type="number"
+                                label="Indice de Cornell"
+                                placeholder="Indice de Cornell"
+                                onChange={this.handleValueChange}
+                                name='Cornell'
+                                value={this.state.result.Cornell}
+                            />
+                        </div> 
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="STInput" 
+                                label="ST"
+                                value={this.state.result.ST} 
+                                onChange={this.handleValueChange}
+                                name='ST'
+                                options={[
+                                    {value: 0, label: "Isoeléctrico"},
+                                    {value: 1, label: "Descendido"},
+                                    {value: 2, label: "Ascendido"},
+                                    {value: 3, label: "Descendido y descendente"},
+                                ]}
+                                />   
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="ST_alteradoInput" 
+                                label="ST Alterado"
+                                value={this.state.result.ST_alterado} 
+                                onChange={this.handleValueChange}
+                                name='ST_alterado'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Lateral"},
+                                    {value: 2, label: "Inferior"},
+                                    {value: 3, label: "Precordiales"},
+                                    {value: 4, label: "Lateral e inferior"},
+                                ]}
+                                />   
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="T_positivasInput" 
+                                label="T Positivas"
+                                value={this.state.result.T_positivas} 
+                                onChange={this.handleValueChange}
+                                name='T_positivas'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "T negativas asimétricas"},
+                                    {value: 2, label: "T negativas simétricas"},
+                                ]}
+                                />   
+                        </div> 
+                    </div>
+                    <div className="row">    
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="anchura_T_Input"
+                                type="number"
+                                label="Anchura T"
+                                placeholder="Anchura T"
+                                onChange={this.handleValueChange}
+                                name='anchura_T'
+                                value={this.state.result.anchura_T}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="altura_T_inf_Input"
+                                type="number"
+                                label="Altura T Inferior"
+                                placeholder="Altura T Inferior"
+                                onChange={this.handleValueChange}
+                                name='altura_T_inf'
+                                value={this.state.result.altura_T_inf}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="altura_T_lat_Input"
+                                type="number"
+                                label="Altura T Lateral"
+                                placeholder="Altura T Lateral"
+                                onChange={this.handleValueChange}
+                                name='altura_T_lat'
+                                value={this.state.result.altura_T_lat}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <FieldGroup
+                                id="altura_T_precord_Input"
+                                type="number"
+                                label="Altura T Precord"
+                                placeholder="Altura T Precord"
+                                onChange={this.handleValueChange}
+                                name='altura_T_precord'
+                                value={this.state.result.altura_T_precord}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="T_plana_Input" 
+                                label="T Plana"
+                                value={this.state.result.T_plana} 
+                                onChange={this.handleValueChange}
+                                name='T_plana'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí, lateral"},
+                                    {value: 2, label: "Sí, inferior"},
+                                    {value: 3, label: "Precordiales Izquierdas"},
+                                    {value: 4, label: "Inferolateral"},
+                                    {value: 5, label: "Inferolateral y precordiales"},
+                                ]}
+                                />   
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="T_negativas_Input" 
+                                label="T Negativas"
+                                value={this.state.result.T_negativas} 
+                                onChange={this.handleValueChange}
+                                name='T_negativas'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí, lateral"},
+                                    {value: 2, label: "Sí, inferior"},
+                                    {value: 3, label: "Precordiales Izquierdas"},
+                                    {value: 4, label: "Inferolateral"},
+                                    {value: 5, label: "Inferolateral y precordiales"},
+                                ]}
+                                />   
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="extrasistoles_Input" 
+                                label="Extrasístoles"
+                                value={this.state.result.extrasistoles} 
+                                onChange={this.handleValueChange}
+                                name='extrasistoles'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Auriculares"},
+                                    {value: 2, label: "Nodales"},
+                                    {value: 3, label: "Ventriculares BCRD"},
+                                    {value: 4, label: "Ventriculares BCRI"},
+                                ]}
+                                />   
+                        </div>
+                    </div>   
+                </div>                
+                    
+                )}
+                {this.state.tabkey === "4" && (<span>AP</span>)}
+                {this.state.tabkey === "5" && (<span>ANALITICA</span>)}
+                {this.state.tabkey === "6" && (<span>PRUEBAS</span>)}
+                <div className="row btns top">
+                    <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
+                        <Button bsStyle="success" block="true" onClick={this.save}>Guardar</Button>
+                    </div>
+                </div>
             </div>
         );
         return result;
