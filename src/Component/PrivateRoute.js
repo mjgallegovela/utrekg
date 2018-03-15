@@ -10,8 +10,6 @@
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
-//import { fbAuth } from '../Provider/Firebase';
-
 const PrivateRoute = ({ component: Component, fb: Fb, ...rest }) => (
   <Route
     {...rest}

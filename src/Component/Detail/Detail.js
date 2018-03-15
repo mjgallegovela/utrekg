@@ -1,9 +1,8 @@
 import React from 'react';
 import './Detail.css';
-import {FormGroup, ControlLabel, Button, Modal, Nav, NavItem} from 'react-bootstrap';
+import {Button, Modal, Nav, NavItem} from 'react-bootstrap';
 import Result from '../../Model/result';
 import { map } from 'lodash';
-//import DatePicker from '../Form/DatePicker';
 import DatePicker from '../Form/DatePicker/DatePicker';
 import FieldGroup from '../Form/FieldGroup';
 import SelectFieldGroup from '../Form/SelectFieldGroup';
@@ -29,12 +28,10 @@ export default class Detail extends React.Component {
     }
 
     componentDidMount() {
-        console.log("componentDidMount")
         this.refreshComponent();
     }
 
     componentDidUpdate() {
-        console.log("componentDidUpdate")
         this.refreshComponent();
     }
 
@@ -222,19 +219,18 @@ export default class Detail extends React.Component {
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                <FormGroup controlId="formControlsSelect">
-                                    <ControlLabel>Fecha de nacimiento</ControlLabel>
-                                    <DatePicker 
-                                        value={this.state.result.fecha_nacimiento} 
-                                        onChange={
-                                            (isoString) => {
-                                                console.log(isoString);
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_nacimiento = isoString;
-                                                this.setState({result: stateResult});
-                                            }}
-                                        />    
-                                </FormGroup>
+                                <DatePicker 
+                                    id="fecha_nacimiento_datepicker"
+                                    label="Fecha de nacimiento"
+                                    value={this.state.result.fecha_nacimiento} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_nacimiento = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <SelectFieldGroup
@@ -829,19 +825,18 @@ export default class Detail extends React.Component {
                     <div className="tab-content">
                     <div className='row'>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FormGroup controlId="formControlsSelect">
-                                <ControlLabel>Fecha del ECG</ControlLabel>
-                                <DatePicker 
-                                    value={this.state.result.fecha_ECG} 
-                                    onChange={
-                                        (isoString) => {
-                                            console.log(isoString);
-                                            var stateResult = this.state.result;
-                                            stateResult.fecha_ECG = isoString;
-                                            this.setState({result: stateResult});
-                                        }}
-                                    />    
-                            </FormGroup>
+                            <DatePicker 
+                                id="fecha_ECG_datepicker"
+                                label="Fecha del ECG"
+                                value={this.state.result.fecha_ECG} 
+                                onChange={
+                                    (isoString) => {
+                                        
+                                        var stateResult = this.state.result;
+                                        stateResult.fecha_ECG = isoString;
+                                        this.setState({result: stateResult});
+                                    }}
+                                />    
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <SelectFieldGroup
@@ -1437,7 +1432,434 @@ export default class Detail extends React.Component {
                 </div>                
                     
                 )}
-                {this.state.tabkey === "4" && (<span>AP</span>)}
+                {this.state.tabkey === "4" && (
+                    <div className="tab-content">
+                        <div className='row'>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="fumadorInput" 
+                                    label="Fumador"
+                                    value={this.state.result.fumador} 
+                                    onChange={this.handleValueChange}
+                                    name='fumador'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                        {value: 2, label: "Exfumador"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <FieldGroup
+                                    id="cigarrillos_Input"
+                                    type="number"
+                                    label="Cigarrillos"
+                                    placeholder="Cigarrillos"
+                                    onChange={this.handleValueChange}
+                                    name='cigarrillos'
+                                    value={this.state.result.cigarrillos}
+                                />
+                            </div> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="alcoholInput" 
+                                    label="Alcohol"
+                                    value={this.state.result.alcohol} 
+                                    onChange={this.handleValueChange}
+                                    name='alcohol'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                        {value: 2, label: "Exalcohólico"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <FieldGroup
+                                    id="copas_Input"
+                                    type="number"
+                                    label="Copas"
+                                    placeholder="Copas"
+                                    onChange={this.handleValueChange}
+                                    name='copas'
+                                    value={this.state.result.copas}
+                                />
+                            </div> 
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="sal_Input" 
+                                    label="Sal"
+                                    value={this.state.result.sal} 
+                                    onChange={this.handleValueChange}
+                                    name='sal'
+                                    options={[
+                                        {value: 0, label: "Normal"},
+                                        {value: 1, label: "Poca"},
+                                        {value: 2, label: "Excesiva"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="dieta_mediterranea_Input" 
+                                    label="Dieta Mediterránea"
+                                    value={this.state.result.dieta_mediterranea} 
+                                    onChange={this.handleValueChange}
+                                    name='dieta_mediterranea'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="HTA_Input" 
+                                    label="HTA"
+                                    value={this.state.result.HTA} 
+                                    onChange={this.handleValueChange}
+                                    name='HTA'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <FieldGroup
+                                    id="años_HTA_Input"
+                                    type="number"
+                                    label="Años HTA"
+                                    placeholder="Años HTA"
+                                    onChange={this.handleValueChange}
+                                    name='años_HTA'
+                                    value={this.state.result.años_HTA}
+                                    help="Años desde que se diagnosticó la HTA"
+                                />  
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="HTA_secundaria_input" 
+                                    label="HTA Secundaria"
+                                    value={this.state.result.HTA_secundaria} 
+                                    onChange={this.handleValueChange}
+                                    name='HTA_secundaria'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="causa_HTA_secund_input" 
+                                    label="Causa HTA Secundaria"
+                                    value={this.state.result.causa_HTA_secund} 
+                                    onChange={this.handleValueChange}
+                                    name='causa_HTA_secund'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Coartación Aórtica"},
+                                        {value: 2, label: "Renal"},
+                                        {value: 3, label: "Feocromocitoma"},
+                                        {value: 4, label: "Cushing"},
+                                        {value: 5, label: "Otros"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="Dgtco_HTA_input" 
+                                    label="Diagnótico HTA"
+                                    help="¿Cómo se realizó el diagnóstico?"
+                                    value={this.state.result.Dgtco_HTA} 
+                                    onChange={this.handleValueChange}
+                                    name='Dgtco_HTA'
+                                    options={[
+                                        {value: 0, label: "Asintomático, esencial"},
+                                        {value: 1, label: "Cefalea"},
+                                        {value: 2, label: "Insuficiencia cardiaca"},
+                                        {value: 3, label: "ECG alterado"},
+                                        {value: 4, label: "Cardiopatía isquémica"},
+                                        {value: 5, label: "Tras AVC"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="AF_MS_input" 
+                                    label="AF MS"
+                                    value={this.state.result.AF_MS} 
+                                    onChange={this.handleValueChange}
+                                    name='AF_MS'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí, padres"},
+                                        {value: 2, label: "Sí, padres y hermanos"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="AF_C_Isq_precoz_input" 
+                                    label="AF C Isq. precoz"
+                                    help="C Isq. Hombres < 55, mujer < 50"
+                                    value={this.state.result.AF_C_Isq_precoz} 
+                                    onChange={this.handleValueChange}
+                                    name='AF_C_Isq_precoz'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Padres"},
+                                        {value: 2, label: "Padres y/o hermanos"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="HTA_controlada_input" 
+                                    label="HTA Controlada"
+                                    help="¿Está bien controlada ahora?"
+                                    value={this.state.result.HTA_controlada} 
+                                    onChange={this.handleValueChange}
+                                    name='HTA_controlada'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                />
+                            </div>
+                        </div>
+                        <div className="row">    
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="DM_input" 
+                                    label="DM"
+                                    value={this.state.result.DM} 
+                                    onChange={this.handleValueChange}
+                                    name='DM'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "DM tipo 1"},
+                                        {value: 2, label: "DM 2 con ADO"},
+                                        {value: 3, label: "DM 2 ID"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico DM"
+                                    value={this.state.result.fecha_dgtco_DM} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_DM = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="DLP_input" 
+                                    label="DLP"
+                                    value={this.state.result.DLP} 
+                                    onChange={this.handleValueChange}
+                                    name='DLP'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí, sin TTO"},
+                                        {value: 2, label: "Sí, con TTO"},
+                                    ]}
+                                />
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="IC_input" 
+                                    label="Insuficiencia Cardiaca (IC)"
+                                    value={this.state.result.IC} 
+                                    onChange={this.handleValueChange}
+                                    name='IC'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "IC sistólica"},
+                                        {value: 2, label: "IC diastólica"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico IC"
+                                    value={this.state.result.fecha_dgtco_IC} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_IC = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="FA_input" 
+                                    label="FA"
+                                    value={this.state.result.FA} 
+                                    onChange={this.handleValueChange}
+                                    name='FA'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí, FA"},
+                                        {value: 2, label: "Flutter"},
+                                        {value: 3, label: "Taquicardia auricular"},
+                                        {value: 4, label: "Taquicardia ventricular"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico FA"
+                                    value={this.state.result.fecha_dgtco_FA} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_FA = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="ictus_input" 
+                                    label="Ictus"
+                                    value={this.state.result.ictus} 
+                                    onChange={this.handleValueChange}
+                                    name='ictus'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "AIT"},
+                                        {value: 2, label: "Ictus embólico"},
+                                        {value: 3, label: "Ictus isquémico"},
+                                        {value: 4, label: "Microvascular"},
+                                        {value: 5, label: "Hemorrágico"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico Ictus"
+                                    value={this.state.result.fecha_dgtco_ictus} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_ictus = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="carotidas_input" 
+                                    label="Carótidas"
+                                    value={this.state.result.carotidas} 
+                                    onChange={this.handleValueChange}
+                                    name='carotidas'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí, sin TTO"},
+                                        {value: 2, label: "Sí, con TTO intervencionista"},
+                                        {value: 3, label: "Ictus isquémico"},
+                                        {value: 4, label: "Microvascular"},
+                                        {value: 5, label: "Hemorrágico"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico carótidas"
+                                    value={this.state.result.fecha_dgtco_carotidas} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_carotidas = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="claudicacion_intermitente_input" 
+                                    label="Claudicación intermitente (CInt)"
+                                    value={this.state.result.claudicacion_intermitente} 
+                                    onChange={this.handleValueChange}
+                                    name='claudicacion_intermitente'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí, sin intervencionismo"},
+                                        {value: 2, label: "Sí, con intervencionismo"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico CInt"
+                                    value={this.state.result.fecha_dgtco_claudicacion} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_dgtco_claudicacion = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="cardiop_isquemica_input" 
+                                    label="Cardiopatía Isquemica (CI)"
+                                    value={this.state.result.cardiop_isquemica} 
+                                    onChange={this.handleValueChange}
+                                    name='cardiop_isquemica'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Angina"},
+                                        {value: 2, label: "Infarto"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <DatePicker 
+                                    label="Fecha de diagnóstico CI"
+                                    value={this.state.result.fecha_cardiop_isquemica} 
+                                    onChange={
+                                        (isoString) => {
+                                            
+                                            var stateResult = this.state.result;
+                                            stateResult.fecha_cardiop_isquemica = isoString;
+                                            this.setState({result: stateResult});
+                                        }}
+                                    />    
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 {this.state.tabkey === "5" && (<span>ANALITICA</span>)}
                 {this.state.tabkey === "6" && (<span>PRUEBAS</span>)}
                 <div className="row btns top">
