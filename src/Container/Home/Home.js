@@ -24,23 +24,9 @@ class HomePage extends Component {
               <List fb={this.props.fb}/>
             </div>
           ) : (this.props.match.params.page === 'detail') ? (
-            <div>
-              <div className="pageTitle">
-                <h3 className={'teal-text'}>
-                  Editar usuario
-                </h3>
-              </div>
               <Detail fb={this.props.fb} exists="true" id={this.props.match.params.id}/>
-            </div>
           ) : (
-            <div>
-              <div className="pageTitle">
-                <h3 className={'teal-text'}>
-                  Nuevo usuario
-                </h3>
-              </div>
               <Detail fb={this.props.fb} exists="false"/>
-            </div>
           )
         }
       </div>

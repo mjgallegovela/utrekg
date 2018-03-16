@@ -41,6 +41,7 @@ class Navigation extends Component {
 
     closeSession() {
         this.props.fb.auth().signOut();
+        window.location = "/";
     }
 }
 

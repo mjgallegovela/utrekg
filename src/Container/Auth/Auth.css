@@ -3,6 +3,10 @@
     text-align: center;
 }
 
-.login-form .col-12 > div {
+.login-form .col-xs-12 > div {
     margin-bottom: 0.75rem;
+}
+
+.loading {
+    font-size: 25px;
 }

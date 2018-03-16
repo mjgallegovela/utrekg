@@ -19,6 +19,7 @@ export default class Detail extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
+            title: this.props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
             loaded: false,
             result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
@@ -31,8 +32,8 @@ export default class Detail extends React.Component {
         this.refreshComponent();
     }
 
-    componentDidUpdate() {
-        this.refreshComponent();
+    componentWillReceiveProps() {
+        this.resetState();
     }
 
     refreshComponent(){
@@ -55,7 +56,6 @@ export default class Detail extends React.Component {
                 that.showMessage("Error al cargar el documento, inténtalo de nuevo.", "error", true)
             });
         } else {
-            console.log("no exists")
             this.setState({result: new Result()});
         }
     }
@@ -69,19 +69,7 @@ export default class Detail extends React.Component {
         });
         this.setState({result: currentState});
         var that = this;
-        if(this.props.exists !== "true" ){
-            result.fecha_registro = new Date().toISOString();
-            this.props.fb.firestore().collection("results").add(result)
-            .then(function(docRef) {
-                that.setState({
-                    id: docRef.id,
-                    message: {txt: "Guardado con éxito", type: "success", showClose: true}});
-            })
-            .catch(function(error) {
-                that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
-            });
-        } else {
-            console.log("actualizando");
+        if(this.state.exists){
             this.props.fb.firestore().collection("results").doc(this.state.id).set(result)
             .then(function(docRef) {
                 that.showMessage("Guardado con éxito", "success", true);
@@ -89,6 +77,27 @@ export default class Detail extends React.Component {
             .catch(function(error) {
                 that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
             });
+        } else {
+            result.fecha_registro = new Date().toISOString();
+            var lockRef = this.props.fb.firestore().collection("lock").doc("A");
+            this.props.fb.firestore().runTransaction(transaction => {
+                return transaction.get(lockRef).then(sfDoc => {
+                    let id = (1 + sfDoc.data().results);
+                    transaction.update(lockRef, { results: id });
+                    let strId = "P" + ("" + id).padStart(10, "0"); 
+                    console.log(strId);
+                    this.props.fb.firestore().collection("results").doc(strId).set(result)
+                    .then(() => {
+                        that.setState({
+                            id: strId,
+                            exists: true,
+                            message: {txt: "Guardado con éxito", type: "success", showClose: true}});
+                    }).catch((error) => {
+                        that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
+                        console.log(error);
+                    });
+                })
+            })
         }
     }
 
@@ -109,6 +118,7 @@ export default class Detail extends React.Component {
     resetState() {
         this.setState({
             exists: this.props.exists === 'true',
+            title: this.props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
             loaded: false,
             result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
@@ -132,6 +142,9 @@ export default class Detail extends React.Component {
     render() {
         const result = (
             <div>
+                <div className="pageTitle">
+                    <h3 className={'teal-text'}>{this.state.title}</h3>
+                </div>
                 <div className="static-modal ">
                     <Modal className={"modal-" + this.state.message.type} show={this.state.message.txt !== ""} 
                             onHide={this.handleCloseModal}>
@@ -147,7 +160,7 @@ export default class Detail extends React.Component {
                 </div>
                 <div className="row btns">
                     <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
-                        <Button bsStyle="success" block="true" onClick={this.save}>Guardar</Button>
+                        <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
                     </div>
                 </div>
                 <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
@@ -1864,7 +1877,7 @@ export default class Detail extends React.Component {
                 {this.state.tabkey === "6" && (<span>PRUEBAS</span>)}
                 <div className="row btns top">
                     <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
-                        <Button bsStyle="success" block="true" onClick={this.save}>Guardar</Button>
+                        <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
                     </div>
                 </div>
             </div>

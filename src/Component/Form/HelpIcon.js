@@ -11,7 +11,7 @@ const HelpIcon = ({text, ...props }) => {
       };
     const tooltipDivId = "tooltip_div_" + Math.random;
     const style = {
-        "float": "right", "margin-left": "3px"
+        "float": "right", "marginLeft": "3px"
     }
     return (
         <div style={ style }>

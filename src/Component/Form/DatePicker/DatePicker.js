@@ -21,7 +21,7 @@ export default createReactClass({
     nullable: PropTypes.bool,
     id: PropTypes.string,
     label: PropTypes.string,
-    help: ""
+    help: PropTypes.string
   },
 
   getDefaultProps() {
@@ -44,7 +44,6 @@ export default createReactClass({
   },
 
   makeDateValues(isoString) {
-    console.log("makeDateValues:" + isoString)
     const selectedDate = isoString ? 
       new Date(`${isoString.slice(0,10)}T12:00:00.000Z`) : 
       (this.props.nullable?null:new Date(`${new Date().toISOString().slice(0,10)}T12:00:00.000Z`)); 
@@ -158,7 +157,6 @@ export default createReactClass({
   },
 
   componentWillReceiveProps(newProps) {
-    console.log("componentWillReceiveProps");
     const value = newProps.value;
     if (this.getValue() !== value) {
       this.setState(this.makeDateValues(value));
@@ -189,15 +187,15 @@ export default createReactClass({
         <div>
           <FormControl componentClass="select" className="day" onChange={this.onChangeDay} value={this.state.day}>
             {this.props.nullable && <option value={0}></option>}
-            {map(this.range(1, this.getMonthDays(this.state.year, this.state.month)), (day) => (<option value={day}>{day}</option>))}
+            {map(this.range(1, this.getMonthDays(this.state.year, this.state.month)), (day) => (<option key={"day" + day} value={day}>{day}</option>))}
           </FormControl>
           <FormControl componentClass="select" className="month" onChange={this.onChangeMonth} value={this.state.month}>
             {this.props.nullable && <option value={-1}></option>}
-            {map(this.props.monthLabels, (label, idx) => (<option value={idx}>{label}</option>))}
+            {map(this.props.monthLabels, (label, idx) => (<option key={"month" + idx} value={idx}>{label}</option>))}
           </FormControl>
           <FormControl componentClass="select" className="year" onChange={this.onChangeYear} value={this.state.year}>
             {this.props.nullable && <option value={0}></option>}
-            {map(reverse(this.range(this.props.minYear, this.props.maxYear)), (year) => (<option value={year}>{year}</option>))}
+            {map(reverse(this.range(this.props.minYear, this.props.maxYear)), (year) => (<option key={"year" + year} value={year}>{year}</option>))}
           </FormControl>
         </div>
       </FormGroup> 

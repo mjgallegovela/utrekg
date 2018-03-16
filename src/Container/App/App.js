@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, Redirect, Switch} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import PrivateRoute from '../../Component/PrivateRoute';
 
+import SecurityPivot from '../Security/SecurityPivot'
 import HomePage from '../Home/Home';
 import AuthPage from '../Auth/Auth';
 import Fb from '../../Provider/Firebase';
@@ -15,14 +16,6 @@ class App extends Component {
     this.state = {fb: Fb}
   }
 
-  componentDidMount() {
-    Fb.auth().onAuthStateChanged(authUser => {
-      authUser
-        ? this.setState(() => ({ authUser }))
-        : this.setState(() => ({ authUser: null }));
-    });
-  }
-
   render() {
     return (
       <Router>
@@ -33,13 +26,7 @@ class App extends Component {
             }}/>
             <PrivateRoute path="/private/:page/:id?" fb={this.state.fb} component={HomePage}  exact />
             <PrivateRoute path="/" fb={this.state.fb} render={() => {
-              return (
-                <Redirect
-                  to={{
-                    pathname: '/private/home'
-                  }}
-                />
-              );
+              return (<SecurityPivot fb={this.state.fb} />);
             }}/>
           </Switch>
         </div>

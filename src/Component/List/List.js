@@ -11,10 +11,14 @@ export default class List extends React.Component {
             elementos: 10,
         };
     }
+
+    componentDidMount() {
+        this.props.fb.firestore().collection("results")
+    }
       
     render() {
         return (
-            <div>
+            <div ref="mainRef">
                 <Link to={'/private/detail/khBIV2EUPuhm97l9uWTI'} className="btn btn-primary">Ir</Link>
                 <Table responsive>
                     <thead>
