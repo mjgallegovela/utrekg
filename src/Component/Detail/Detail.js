@@ -15,7 +15,6 @@ export default class Detail extends React.Component {
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.resetState = this.resetState.bind(this);
         this.handleChangeDate = this.handleChangeDate.bind(this);
-        this.refreshComponent = this.refreshComponent.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
@@ -28,25 +27,22 @@ export default class Detail extends React.Component {
         };
     }
 
+    componentWillReceiveProps(nextProps, nextState) {
+        this.resetState(nextProps);
+    }
+
     componentDidMount() {
-        this.refreshComponent();
+        this.resetState(this.props);
     }
 
-    componentWillReceiveProps() {
-        this.resetState();
-    }
-
-    refreshComponent(){
-        if(!this.state.loaded || this.state.exists !== (this.props.exists === "true")) {
-            this.resetState();
-        }
+    componentDidUpdate() {
         if(!this.state.loaded) {this.setState({loaded: true}); this.load();}
     }
 
     load() {
         if(this.state.exists) {
             this.showMessage("Cargando...", "info", false);
-            var docRef = this.props.fb.firestore().collection("results").doc(this.props.id);
+            var docRef = this.props.fb.firestore().collection("results").doc(this.state.id);
             var that = this;
             docRef.get().then(function(doc) {
                 that.setState({
@@ -85,12 +81,12 @@ export default class Detail extends React.Component {
                     let id = (1 + sfDoc.data().results);
                     transaction.update(lockRef, { results: id });
                     let strId = "P" + ("" + id).padStart(10, "0"); 
-                    console.log(strId);
                     this.props.fb.firestore().collection("results").doc(strId).set(result)
                     .then(() => {
                         that.setState({
                             id: strId,
                             exists: true,
+                            title: 'Editar usuario',
                             message: {txt: "Guardado con éxito", type: "success", showClose: true}});
                     }).catch((error) => {
                         that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
@@ -115,16 +111,17 @@ export default class Detail extends React.Component {
         this.setState({tabkey: eventKey});
     }
 
-    resetState() {
+    resetState(props) {
         this.setState({
-            exists: this.props.exists === 'true',
-            title: this.props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
+            exists: props.exists === 'true',
+            title: props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
             loaded: false,
             result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
             message: {txt: "", type: "info", showClose: false},
             tabkey: "1"         
         });
+        
     }
 
     handleChangeDate(date) {
