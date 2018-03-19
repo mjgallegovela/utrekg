@@ -18,7 +18,6 @@ export default class Detail extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
-            title: this.props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
             loaded: false,
             result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
@@ -81,12 +80,12 @@ export default class Detail extends React.Component {
                     let id = (1 + sfDoc.data().results);
                     transaction.update(lockRef, { results: id });
                     let strId = "P" + ("" + id).padStart(10, "0"); 
+                    result.id = strId;
                     this.props.fb.firestore().collection("results").doc(strId).set(result)
                     .then(() => {
                         that.setState({
                             id: strId,
                             exists: true,
-                            title: 'Editar usuario',
                             message: {txt: "Guardado con éxito", type: "success", showClose: true}});
                     }).catch((error) => {
                         that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
@@ -114,7 +113,6 @@ export default class Detail extends React.Component {
     resetState(props) {
         this.setState({
             exists: props.exists === 'true',
-            title: props.exists === 'true'? 'Editar usuario' : 'Nuevo usuario',
             loaded: false,
             result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
@@ -140,7 +138,7 @@ export default class Detail extends React.Component {
         const result = (
             <div>
                 <div className="pageTitle">
-                    <h3 className={'teal-text'}>{this.state.title}</h3>
+                    <h3 className={'teal-text'}>{this.state.exists ? 'Editar Usuario: ' + this.state.id : 'Crear Nuevo Usuario'}</h3>
                 </div>
                 <div className="static-modal ">
                     <Modal className={"modal-" + this.state.message.type} show={this.state.message.txt !== ""} 
@@ -150,7 +148,7 @@ export default class Detail extends React.Component {
                         </Modal.Body>
                         {this.state.message.showClose && (
                         <Modal.Footer>
-                            <Button bsStyle={this.state.message.type} onClick={this.handleCloseModal}>Close</Button>
+                            <Button bsStyle={this.state.message.type} onClick={this.handleCloseModal}>Aceptar</Button>
                         </Modal.Footer>
                         )}
                     </Modal>
