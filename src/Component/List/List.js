@@ -45,7 +45,9 @@ export default class List extends React.Component {
     }
 
     delete(id){
+        
         var that = this;
+        this.showMessage("Borrando paciente...", "info", false);
         this.props.fb.firestore().collection("results").doc(id).delete().then(function() {
             that.showMessage("Se ha borrado el usuario", "success", true, () => that.refresh());
         }).catch(function(error) {
@@ -58,7 +60,7 @@ export default class List extends React.Component {
     }
 
     handleCloseModal() {
-        var callback = this.state.message.closeCallback ? this.state.message.closeCallback() : () => {};
+        var callback = this.state.message.closeCallback ? this.state.message.closeCallback : () => {};
         this.setState(
             {message: {txt: "", type: "info", showClose: false}}, 
             callback()

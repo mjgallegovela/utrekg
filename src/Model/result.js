@@ -147,9 +147,9 @@ class Result {
         this.fecha_cardiop_isquemica = "";
 
         // Analitica
-        this.ANALITICA_BASAL	 = null;
+        this.analitica_basal	 = null;
         this.fecha_analitica	 = null;
-        this.Hb = null;
+        this.hb = null;
         this.hcto = null;
         this.VCM = null;
         this.CHCM = null;

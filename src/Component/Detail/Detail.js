@@ -1857,8 +1857,288 @@ export default class Detail extends React.Component {
                     </div>
                 )}
                 
-                {this.state.tabkey === "5" && (<span>ANALITICA</span>)}
-                {this.state.tabkey === "6" && (<span>PRUEBAS</span>)}
+                {this.state.tabkey === "5" && (
+                <div className="tab-content">
+                    <div className='row'>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="analitica_basal_input" 
+                                label="Analítica basal"
+                                value={this.state.result.analitica_basal} 
+                                onChange={this.handleValueChange}
+                                name='analitica_basal'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <DatePicker 
+                                label="Fecha analítica"
+                                value={this.state.result.fecha_analitica} 
+                                onChange={
+                                    (isoString) => {
+                                        var stateResult = this.state.result;
+                                        stateResult.fecha_analitica = isoString;
+                                        this.setState({result: stateResult});
+                                    }}
+                                />    
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="Hb_Input"
+                                type="number"
+                                label="Hb"
+                                placeholder="Hb"
+                                onChange={this.handleValueChange}
+                                name='Hb'
+                                value={this.state.result.hb}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="hcto_Input"
+                                type="number"
+                                label="Htco"
+                                placeholder="Hcto"
+                                onChange={this.handleValueChange}
+                                name='hcto'
+                                value={this.state.result.hcto}
+                            />
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="VCM_Input"
+                                type="number"
+                                label="VCM"
+                                placeholder="VCM"
+                                onChange={this.handleValueChange}
+                                name='VCM'
+                                value={this.state.result.VCM}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="CHCM_Input"
+                                type="number"
+                                label="CHCM"
+                                placeholder="CHCM"
+                                onChange={this.handleValueChange}
+                                name='CHCM'
+                                value={this.state.result.CHCM}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="plaquetas_Input"
+                                type="number"
+                                label="Plaquetas"
+                                placeholder="Plaquetas"
+                                onChange={this.handleValueChange}
+                                name='plaquetas'
+                                value={this.state.result.plaquetas}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="glucosa_Input"
+                                type="number"
+                                label="Glucosa"
+                                placeholder="Glucosa"
+                                onChange={this.handleValueChange}
+                                name='glucosa'
+                                value={this.state.result.glucosa}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="hb1Ac_Input"
+                                type="number"
+                                label="hb1Ac"
+                                placeholder="hb1Ac"
+                                onChange={this.handleValueChange}
+                                name='hb1Ac'
+                                value={this.state.result.hb1Ac}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="urea_Input"
+                                type="number"
+                                label="Urea"
+                                placeholder="Urea"
+                                onChange={this.handleValueChange}
+                                name='urea'
+                                value={this.state.result.urea}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="creatinina_Input"
+                                type="number"
+                                label="Creatinina"
+                                placeholder="Creatinina"
+                                onChange={this.handleValueChange}
+                                name='creatinina'
+                                value={this.state.result.creatinina}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="FG_Input"
+                                type="number"
+                                label="FG"
+                                placeholder="FG"
+                                onChange={this.handleValueChange}
+                                name='FG'
+                                value={this.state.result.FG}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="Na_Input"
+                                type="number"
+                                label="Na"
+                                placeholder="Na"
+                                onChange={this.handleValueChange}
+                                name='Na'
+                                value={this.state.result.Na}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="K_Input"
+                                type="number"
+                                label="K"
+                                placeholder="K"
+                                onChange={this.handleValueChange}
+                                name='K'
+                                value={this.state.result.K}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="GOT_Input"
+                                type="number"
+                                label="GOT"
+                                placeholder="GOT"
+                                onChange={this.handleValueChange}
+                                name='GOT'
+                                value={this.state.result.GOT}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="GPT_Input"
+                                type="number"
+                                label="GPT"
+                                placeholder="GPT"
+                                onChange={this.handleValueChange}
+                                name='GPT'
+                                value={this.state.result.GPT}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="GGT_Input"
+                                type="number"
+                                label="GGT"
+                                placeholder="GGT"
+                                onChange={this.handleValueChange}
+                                name='GGT'
+                                value={this.state.result.GGT}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="CT_Input"
+                                type="number"
+                                label="CT"
+                                placeholder="CT"
+                                onChange={this.handleValueChange}
+                                name='CT'
+                                value={this.state.result.CT}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="LDL_Input"
+                                type="number"
+                                label="LDL"
+                                placeholder="LDL"
+                                onChange={this.handleValueChange}
+                                name='LDL'
+                                value={this.state.result.LDL}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="HDL_Input"
+                                type="number"
+                                label="HDL"
+                                placeholder="HDL"
+                                onChange={this.handleValueChange}
+                                name='HDL'
+                                value={this.state.result.HDL}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="TG_Input"
+                                type="number"
+                                label="TG"
+                                placeholder="TG"
+                                onChange={this.handleValueChange}
+                                name='TG'
+                                value={this.state.result.TG}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="microalbuminuria_Input"
+                                type="number"
+                                label="Microalbuminuria"
+                                placeholder="Microalbuminuria"
+                                onChange={this.handleValueChange}
+                                name='microalbuminuria'
+                                value={this.state.result.microalbuminuria}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="cociente_alb_cr_Input"
+                                type="number"
+                                label="Cociente Alb/cr"
+                                placeholder="Cociente Alb/cr"
+                                onChange={this.handleValueChange}
+                                name='cociente_alb_cr'
+                                value={this.state.result.cociente_alb_cr}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="proteinuria_Input"
+                                type="number"
+                                label="Proteinuria"
+                                placeholder="Proteinuria"
+                                onChange={this.handleValueChange}
+                                name='proteinuria'
+                                value={this.state.result.proteinuria}
+                            />
+                        </div>
+                    </div>
+                   
+                </div>
+                )}
+                {this.state.tabkey === "6" && (
+                <div className="tab-content">
+                    <div className='row'>
+                    </div>
+                </div>
+                )}
                 <div className="row btns top">
                     <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
                         <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
