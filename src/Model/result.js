@@ -147,51 +147,52 @@ class Result {
         this.fecha_cardiop_isquemica = "";
 
         // Analitica
-        this.analitica_basal	 = null;
-        this.fecha_analitica	 = null;
-        this.hb = null;
-        this.hcto = null;
-        this.VCM = null;
-        this.CHCM = null;
-        this.plaquetas = null;
-        this.glucosa = null;
-        this.hb1Ac = null;
-        this.urea = null;
-        this.creatinina = null;
-        this.FG = null;
-        this.Na = null;
-        this.K = null;
-        this.GOT = null;
-        this.GPT = null;
-        this.GGT = null;
-        this.CT = null;
-        this.LDL = null;
-        this.HDL = null;
-        this.TG = null;
-        this.microalbuminuria = null;
-        this.cociente_alb_cr = null;
-        this.proteinuria = null;
+        this.analitica_basal = 0;
+        this.fecha_analitica = "";
+        this.hb = 0;
+        this.hcto = 0;
+        this.VCM = 0;
+        this.CHCM = 0;
+        this.plaquetas = 0;
+        this.glucosa = 0;
+        this.hb1Ac = 0;
+        this.urea = 0;
+        this.creatinina = 0;
+        this.FG = 0;
+        this.Na = 0;
+        this.K = 0;
+        this.GOT = 0;
+        this.GPT = 0;
+        this.GGT = 0;
+        this.CT = 0;
+        this.LDL = 0;
+        this.HDL = 0;
+        this.TG = 0;
+        this.microalbuminuria = 0;
+        this.cociente_alb_cr = 0;
+        this.proteinuria = 0;
 
         // Pruebas
         this.MAPA_reciente = null;
-        this.mapa_diurna	 = null;
+        this.mapa_diurna = null;
         this.mapa_nocturno = null;
         this.dip = null;
-        this.ecocardio = null;
-        this.fecha_ecocardio	 = null;
-        this.DTDVI = null;
-        this.septo = null;
-        this.masa = null;
-        this.AI = null;
-        this.FEVI = null;
-        this.diastole = null;
-        this.valvulopatia = null;
-        this.fondo_ojo = null;
-        this.fecha_fondo_ojo = null;
-        this.fondo_ojo_patologico = null;
-        this.renal_estudio = null;
-        this.patologia_renal = null;
-
+        this.ecocardio = 0;
+        this.fecha_ecocardio = "";
+        this.DTDVI = 0;
+        this.septo = 0;
+        this.masa = 0;
+        this.AI = 0;
+        this.FEVI = 0;
+        this.diastole = 0; //select
+        this.valvulopatia = 0; //select
+        this.fondo_ojo = 0;//bool
+        this.fecha_fondo_ojo = ""; 
+        this.fondo_ojo_patologico = 0; //select
+        this.renal_estudio = 0; //bool
+        this.patologia_renal = 0;
+        this.cual_patologia_renal = "";
+        this.proteinuria = 0;
         
     }
 }
