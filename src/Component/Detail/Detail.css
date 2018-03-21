@@ -1,6 +1,7 @@
 .row.btns {
     margin-bottom: 20px
 }
+
 .tab-content {
     margin-left: 0 !important;
     border-left: 1px solid #222;
@@ -22,18 +23,3 @@
     border-bottom-color: transparent;   
 }
 
-.modal-info .modal-content {
-    background-color: #d9edf7;
-}
-
-.modal-success .modal-content {
-    background-color: #dff0d8;
-}
-
-.modal-danger .modal-content {
-    background-color: #f2dede;
-}
-
-.modal-warning .modal-content {
-    background-color: #fcf8e3;
-}

@@ -1,0 +1,15 @@
+.modal-info .modal-content {
+    background-color: #d9edf7;
+}
+
+.modal-success .modal-content {
+    background-color: #dff0d8;
+}
+
+.modal-danger .modal-content {
+    background-color: #f2dede;
+}
+
+.modal-warning .modal-content {
+    background-color: #fcf8e3;
+}

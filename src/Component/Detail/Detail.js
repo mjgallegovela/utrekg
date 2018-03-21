@@ -1,11 +1,12 @@
 import React from 'react';
 import './Detail.css';
-import {Button, Modal, Nav, NavItem} from 'react-bootstrap';
+import {Button, Nav, NavItem, Glyphicon} from 'react-bootstrap';
 import Result from '../../Model/result';
 import { map } from 'lodash';
 import DatePicker from '../Form/DatePicker/DatePicker';
 import FieldGroup from '../Form/FieldGroup';
 import SelectFieldGroup from '../Form/SelectFieldGroup';
+import CustomModal from '../Form/Modal/CustomModal';
 
 export default class Detail extends React.Component {
     constructor(props) {
@@ -140,22 +141,10 @@ export default class Detail extends React.Component {
                 <div className="pageTitle">
                     <h3 className={'teal-text'}>{this.state.exists ? 'Editar Usuario: ' + this.state.id : 'Crear Nuevo Usuario'}</h3>
                 </div>
-                <div className="static-modal ">
-                    <Modal className={"modal-" + this.state.message.type} show={this.state.message.txt !== ""} 
-                            onHide={this.handleCloseModal}>
-                        <Modal.Body>
-                            {this.state.message.txt}
-                        </Modal.Body>
-                        {this.state.message.showClose && (
-                        <Modal.Footer>
-                            <Button bsStyle={this.state.message.type} onClick={this.handleCloseModal}>Aceptar</Button>
-                        </Modal.Footer>
-                        )}
-                    </Modal>
-                </div>
+                <CustomModal handleCloseModal={this.handleCloseModal} message={this.state.message} />
                 <div className="row btns">
                     <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
-                        <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
+                        <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
                     </div>
                 </div>
                 <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
