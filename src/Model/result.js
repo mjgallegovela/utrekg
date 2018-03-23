@@ -173,10 +173,10 @@ class Result {
         this.proteinuria = 0;
 
         // Pruebas
-        this.MAPA_reciente = null;
-        this.mapa_diurna = null;
-        this.mapa_nocturno = null;
-        this.dip = null;
+        this.mapa_reciente = 0; //bool
+        this.mapa_diurna = 0;
+        this.mapa_nocturno = 0;
+        this.dip = 0;
         this.ecocardio = 0;
         this.fecha_ecocardio = "";
         this.DTDVI = 0;
@@ -190,7 +190,7 @@ class Result {
         this.fecha_fondo_ojo = ""; 
         this.fondo_ojo_patologico = 0; //select
         this.renal_estudio = 0; //bool
-        this.patologia_renal = 0;
+        this.patologia_renal = 0; //bool
         this.cual_patologia_renal = "";
         this.proteinuria = 0;
         

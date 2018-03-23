@@ -72,6 +72,8 @@ export default class List extends React.Component {
             <div ref="mainRef">
                 <CustomModal handleCloseModal={this.handleCloseModal} message={this.state.message} />
                 {this.state.loaded && (size(this.state.collection)>0 ? (
+                <div>
+                
                 <Table responsive>
                     <thead>
                         <tr>
@@ -100,7 +102,7 @@ export default class List extends React.Component {
                         </tr>
                         ))}
                     </tbody>
-                </Table>):(
+                </Table></div>):(
                     <div className="row"><div className="col-12 text-center"><Label bsStyle="warning"><Glyphicon glyph="exclamation-sign" /> Aún no hay ningún paciente registrado</Label></div></div>
                 ))
             }

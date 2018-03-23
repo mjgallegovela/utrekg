@@ -49,7 +49,10 @@ export default class Detail extends React.Component {
                     result: doc.data(), 
                     message: {txt: "", type: "info", showClose: false}});
             }).catch(function(error) {
-                that.showMessage("Error al cargar el documento, inténtalo de nuevo.", "error", true)
+                that.setState({
+                    result: new Result(), 
+                    message: {txt: "El documento que está intentando cargar no existe.", type: "error", showClose: true, exists: false}
+                });
             });
         } else {
             this.setState({result: new Result()});
@@ -147,6 +150,54 @@ export default class Detail extends React.Component {
                         <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
                     </div>
                 </div>
+                <div className='row'>
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <FieldGroup
+                            id="identificacionInput"
+                            type="text"
+                            label="Identificación"
+                            placeholder="Identificación"
+                            onChange={this.handleValueChange}
+                            name='identificacion'
+                            value={this.state.result.identificacion}
+                            />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <FieldGroup
+                            id="nombreInput"
+                            type="text"
+                            label="Nombre"
+                            placeholder="Nombre del usuario"
+                            onChange={this.handleValueChange}
+                            name='nombre'
+                            value={this.state.result.nombre}
+                            />
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <FieldGroup
+                            id="apellido1Input"
+                            type="text"
+                            label="Primer apellido"
+                            placeholder="Primer apellido"
+                            onChange={this.handleValueChange}
+                            name='apellido1'
+                            value={this.state.result.apellido1}
+                            />
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-4 col-lg-4 col-lg-offset-0">
+                        <FieldGroup
+                            id="apellido2Input"
+                            type="text"
+                            label="Segundo apellido"
+                            placeholder="Segundo apellido"
+                            onChange={this.handleValueChange}
+                            name='apellido2'
+                            value={this.state.result.apellido2}
+                            />
+                    </div>
+                </div>
                 <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
                     <NavItem eventKey="1">
                         Datos personales
@@ -171,50 +222,6 @@ export default class Detail extends React.Component {
                 {this.state.tabkey === "1" && (
                     <div className="tab-content">
                         <div className='row'>
-                            <div className="col-xs-12">
-                                <FieldGroup
-                                    id="identificacionInput"
-                                    type="text"
-                                    label="Identificación"
-                                    placeholder="Identificación"
-                                    onChange={this.handleValueChange}
-                                    name='identificacion'
-                                    value={this.state.result.identificacion}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                                <FieldGroup
-                                    id="nombreInput"
-                                    type="text"
-                                    label="Nombre"
-                                    placeholder="Nombre del usuario"
-                                    onChange={this.handleValueChange}
-                                    name='nombre'
-                                    value={this.state.result.nombre}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                                <FieldGroup
-                                    id="apellido1Input"
-                                    type="text"
-                                    label="Primer apellido"
-                                    placeholder="Primer apellido"
-                                    onChange={this.handleValueChange}
-                                    name='apellido1'
-                                    value={this.state.result.apellido1}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-4 col-lg-4 col-lg-offset-0">
-                                <FieldGroup
-                                    id="apellido2Input"
-                                    type="text"
-                                    label="Segundo apellido"
-                                    placeholder="Segundo apellido"
-                                    onChange={this.handleValueChange}
-                                    name='apellido2'
-                                    value={this.state.result.apellido2}
-                                    />
-                            </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <DatePicker 
                                     id="fecha_nacimiento_datepicker"
@@ -2136,6 +2143,277 @@ export default class Detail extends React.Component {
                 {this.state.tabkey === "6" && (
                 <div className="tab-content">
                     <div className='row'>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="MAPA_reciente_input" 
+                                label="Mapa Reciente?"
+                                value={this.state.result.mapa_reciente} 
+                                onChange={this.handleValueChange}
+                                name='mapa_reciente'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="mapa_diurna_Input"
+                                type="number"
+                                label="Mapa Diurna"
+                                placeholder="Mapa Diurna"
+                                onChange={this.handleValueChange}
+                                name='mapa_diurna'
+                                value={this.state.result.mapa_diurna}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="mapa_nocturno_Input"
+                                type="number"
+                                label="Mapa Nocturno"
+                                placeholder="Mapa Nocturno"
+                                onChange={this.handleValueChange}
+                                name='mapa_nocturno'
+                                value={this.state.result.mapa_nocturno}
+                            />
+                        </div>
+
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="dip_Input"
+                                type="number"
+                                label="Dip"
+                                placeholder="Dip"
+                                onChange={this.handleValueChange}
+                                name='dip'
+                                value={this.state.result.dip}
+                            />
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="ecocardio_input" 
+                                label="Ecocardio"
+                                value={this.state.result.ecocardio} 
+                                onChange={this.handleValueChange}
+                                name='ecocardio'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <DatePicker 
+                                label="Fecha Ecocardio"
+                                value={this.state.result.fecha_ecocardio} 
+                                onChange={
+                                    (isoString) => {
+                                        var stateResult = this.state.result;
+                                        stateResult.fecha_ecocardio = isoString;
+                                        this.setState({result: stateResult});
+                                    }}
+                                />    
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="DTDVI_Input"
+                                type="number"
+                                label="DTDVI"
+                                placeholder="DTDVI"
+                                onChange={this.handleValueChange}
+                                name='DTDVI'
+                                value={this.state.result.DTDVI}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="septo_Input"
+                                type="number"
+                                label="Septo"
+                                placeholder="Septo"
+                                help="Grosor del septo"
+                                onChange={this.handleValueChange}
+                                name='septo'
+                                value={this.state.result.septo}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="masa_Input"
+                                type="number"
+                                label="Masa"
+                                placeholder="Masa"
+                                onChange={this.handleValueChange}
+                                name='masa'
+                                value={this.state.result.masa}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="AI_Input"
+                                type="number"
+                                label="AI"
+                                placeholder="AI"
+                                onChange={this.handleValueChange}
+                                name='AI'
+                                value={this.state.result.AI}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="FEVI_Input"
+                                type="number"
+                                label="FEVI"
+                                placeholder="FEVI"
+                                onChange={this.handleValueChange}
+                                name='FEVI'
+                                value={this.state.result.FEVI}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="diastole_input" 
+                                label="Diástole"
+                                value={this.state.result.diastole} 
+                                onChange={this.handleValueChange}
+                                name='diastole'
+                                options={[
+                                    {value: 0, label: "Normal"},
+                                    {value: 1, label: "Alteración relajación"},
+                                    {value: 2, label: "Pseudonormal"},
+                                    {value: 3, label: "Restrictivo reversible"},
+                                    {value: 4, label: "Restrictivo irreversible"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="valvulopatia_input" 
+                                label="Valvulopatía"
+                                value={this.state.result.valvulopatia} 
+                                onChange={this.handleValueChange}
+                                name='valvulopatia'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "EAO lig"},
+                                    {value: 2, label: "IAO lig"},
+                                    {value: 3, label: "EAO mod"},
+                                    {value: 4, label: "IAO mod"},
+                                    {value: 5, label: "EAO sev"},
+                                    {value: 6, label: "IAO sev"},
+                                    {value: 7, label: "EM lig"},
+                                    {value: 8, label: "IM lig"},
+                                    {value: 9, label: "EM mod"},
+                                    {value: 10, label: "IM mod"},
+                                    {value: 11, label: "EM sev"},
+                                    {value: 12, label: "IM sev"},
+                                    {value: 13, label: "IT lig"},
+                                    {value: 14, label: "IT mod"},
+                                    {value: 15, label: "IT sev"},
+                                ]}
+                            />
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="fondo_ojo_input" 
+                                label="Fondo ojo"
+                                value={this.state.result.fondo_ojo} 
+                                onChange={this.handleValueChange}
+                                name='fondo_ojo'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <DatePicker 
+                                label="Fecha Fondo Ojo"
+                                value={this.state.result.fecha_fondo_ojo} 
+                                onChange={
+                                    (isoString) => {
+                                        var stateResult = this.state.result;
+                                        stateResult.fecha_fondo_ojo = isoString;
+                                        this.setState({result: stateResult});
+                                    }}
+                                />    
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="fondo_ojo_patol_input" 
+                                label="Fondo ojo patológico"
+                                value={this.state.result.fondo_ojo_patologico} 
+                                onChange={this.handleValueChange}
+                                name='fondo_ojo_patologico'
+                                options={[
+                                    {value: 0, label: "Normal"},
+                                    {value: 1, label: "Retinopatía grado 1"},
+                                    {value: 2, label: "Retinopatía grado 2"},
+                                    {value: 3, label: "Retinopatía grado 3"},
+                                ]}
+                            />
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="renal_estudio_input" 
+                                label="Estudio Renal"
+                                value={this.state.result.renal_estudio} 
+                                onChange={this.handleValueChange}
+                                name='renal_estudio'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="patologia_renal_input" 
+                                label="Patología Renal"
+                                value={this.state.result.patologia_renal} 
+                                onChange={this.handleValueChange}
+                                name='patologia_renal'
+                                options={[
+                                    {value: 0, label: "No"},
+                                    {value: 1, label: "Sí"},
+                                ]}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <FieldGroup
+                                id="cual_patologia_renal_Input"
+                                type="text"
+                                label="Qué patología renal?"
+                                placeholder="Qué patología renal?"
+                                onChange={this.handleValueChange}
+                                name='cual_patologia_renal'
+                                value={this.state.result.cual_patologia_renal}
+                            />
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-lg-3">
+                            <SelectFieldGroup
+                                id="proteinuria_input" 
+                                label="Proteinuria"
+                                value={this.state.result.proteinuria} 
+                                onChange={this.handleValueChange}
+                                name='proteinuria'
+                                options={[
+                                    {value: 0, label: "Negativo"},
+                                    {value: 1, label: "Microalbuminuria"},
+                                    {value: 2, label: "Proteinuria"},
+                                    {value: 3, label: "Rango nefrótica"},
+                                ]}
+                            />
+                        </div>
                     </div>
                 </div>
                 )}
@@ -2150,3 +2428,4 @@ export default class Detail extends React.Component {
     }
    
 }
+
