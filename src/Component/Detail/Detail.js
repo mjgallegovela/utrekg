@@ -391,7 +391,7 @@ export default class Detail extends React.Component {
                                     placeholder="TAD_MSI"
                                     onChange={this.handleValueChange}
                                     name='TAD_MSI'
-                                    value={this.state.result.TAS_MSI}
+                                    value={this.state.result.TAD_MSI}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
