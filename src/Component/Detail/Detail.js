@@ -930,37 +930,43 @@ export default class Detail extends React.Component {
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="EjePInput"
-                                type="number"
+                            <SelectFieldGroup
+                                id="EjePInput" 
                                 label="Eje P"
-                                placeholder="Eje P"
+                                value={this.state.result.EJE_P} 
                                 onChange={this.handleValueChange}
                                 name='EJE_P'
-                                value={this.state.result.EJE_P}
-                                />
+                                options={[
+                                    {value: 0, label: "Positivo"},
+                                    {value: 1, label: "Negativo"}
+                                ]}
+                                />    
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="EjeQRSInput"
-                                type="number"
+                            <SelectFieldGroup
+                                id="EjeQRSInput" 
                                 label="Eje QRS"
-                                placeholder="Eje QRS"
+                                value={this.state.result.EJE_QRS} 
                                 onChange={this.handleValueChange}
                                 name='EJE_QRS'
-                                value={this.state.result.EJE_QRS}
-                                />
+                                options={[
+                                    {value: 0, label: "Positivo"},
+                                    {value: 1, label: "Negativo"}
+                                ]}
+                                />    
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="EjeQRSInput"
-                                type="number"
+                            <SelectFieldGroup
+                                id="EjeTInput" 
                                 label="Eje T"
-                                placeholder="Eje T"
+                                value={this.state.result.EJE_T} 
                                 onChange={this.handleValueChange}
                                 name='EJE_T'
-                                value={this.state.result.EJE_T}
-                                />
+                                options={[
+                                    {value: 0, label: "Positivo"},
+                                    {value: 1, label: "Negativo"}
+                                ]}
+                                />    
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <FieldGroup
@@ -1358,7 +1364,7 @@ export default class Detail extends React.Component {
                                 onChange={this.handleValueChange}
                                 name='T_positivas'
                                 options={[
-                                    {value: 0, label: "No"},
+                                    {value: 0, label: "Sí"},
                                     {value: 1, label: "T negativas asimétricas"},
                                     {value: 2, label: "T negativas simétricas"},
                                 ]}
