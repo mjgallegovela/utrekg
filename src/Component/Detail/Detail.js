@@ -85,6 +85,7 @@ export default class Detail extends React.Component {
                     transaction.update(lockRef, { results: id });
                     let strId = "P" + ("" + id).padStart(10, "0"); 
                     result.id = strId;
+                    result.creatorUser = this.props.fb.auth().currentUser.email;
                     this.props.fb.firestore().collection("results").doc(strId).set(result)
                     .then(() => {
                         that.setState({
@@ -146,7 +147,11 @@ export default class Detail extends React.Component {
                 </div>
                 <CustomModal handleCloseModal={this.handleCloseModal} message={this.state.message} />
                 <div className="row btns">
-                    <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
+                    <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
+                        {this.state.exists ? 'Creado por: ' + this.state.result.creatorUser : ''}
+                    </div>
+                    <div className="col-xs-12 col-sm-4 col-md-4 col-lg-6"></div>
+                    <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
                         <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
                     </div>
                 </div>
@@ -195,6 +200,29 @@ export default class Detail extends React.Component {
                             onChange={this.handleValueChange}
                             name='apellido2'
                             value={this.state.result.apellido2}
+                            />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <SelectFieldGroup
+                            id="visitaInput" 
+                            label="Visita"
+                            value={this.state.result.visita} 
+                            onChange={this.handleValueChange}
+                            name='visita'
+                            options={[
+                                {value: 1, label: "1ª"},
+                                {value: 2, label: "2ª"},
+                                {value: 3, label: "3ª"},
+                                {value: 4, label: "4ª"},
+                                {value: 5, label: "5ª"},
+                                {value: 6, label: "6ª"},
+                                {value: 7, label: "7ª"},
+                                {value: 8, label: "8ª"},
+                                {value: 9, label: "9ª"},
+                                {value: 10, label: "10ª"}
+                            ]}
                             />
                     </div>
                 </div>
@@ -1437,6 +1465,7 @@ export default class Detail extends React.Component {
                     
                 )}
                 {this.state.tabkey === "4" && (
+                    /* AP */
                     <div className="tab-content">
                         <div className='row'>
                             <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -1859,6 +1888,50 @@ export default class Detail extends React.Component {
                                             this.setState({result: stateResult});
                                         }}
                                     />    
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="disfuncionSexualInput" 
+                                    label="Disfunción Sexual"
+                                    value={this.state.result.disfuncionSexual} 
+                                    onChange={this.handleValueChange}
+                                    name='disfuncionSexual'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="gradodDisfuncionSexualInput" 
+                                    label="Grado Disfunción Sexual"
+                                    value={this.state.result.gradodDisfuncionSexual} 
+                                    onChange={this.handleValueChange}
+                                    name='gradodDisfuncionSexual'
+                                    options={[
+                                        {value: 0, label: "-"},
+                                        {value: 1, label: "I"},
+                                        {value: 2, label: "II"},
+                                        {value: 2, label: "III"},
+                                        {value: 2, label: "IV"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="soasInput" 
+                                    label="SAOS"
+                                    value={this.state.result.SAOS} 
+                                    onChange={this.handleValueChange}
+                                    name='SAOS'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
                             </div>
                         </div>
                     </div>

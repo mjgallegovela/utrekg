@@ -2,10 +2,12 @@ class Result {
     constructor(){
         this.fecha_registro = null;
         // Datos
+        this.creatorUser = "";
         this.identificacion = "";
         this.nombre = "";
         this.apellido1 = "";
         this.apellido2 = "";
+        this.visita = 1;
         this.sexo = "H";
         this.fecha_nacimiento = "";
         this.edad_inclusion = 0;
@@ -145,6 +147,9 @@ class Result {
         this.fecha_dgtco_claudicacion = "";
         this.cardiop_isquemica = 0;
         this.fecha_cardiop_isquemica = "";
+        this.disfuncionSexual = 0;
+        this.gradodDisfuncionSexual = 0;
+        this.SAOS = 1;
 
         // Analitica
         this.analitica_basal = 0;
