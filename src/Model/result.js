@@ -148,8 +148,9 @@ class Result {
         this.cardiop_isquemica = 0;
         this.fecha_cardiop_isquemica = "";
         this.disfuncionSexual = 0;
-        this.gradodDisfuncionSexual = 0;
-        this.SAOS = 1;
+        this.SAOS = 0;
+        this.EPOC = 0;
+        this.gradodEPOC = 0;
 
         // Analitica
         this.analitica_basal = 0;

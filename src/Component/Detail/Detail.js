@@ -1882,7 +1882,6 @@ export default class Detail extends React.Component {
                                     value={this.state.result.fecha_cardiop_isquemica} 
                                     onChange={
                                         (isoString) => {
-                                            
                                             var stateResult = this.state.result;
                                             stateResult.fecha_cardiop_isquemica = isoString;
                                             this.setState({result: stateResult});
@@ -1906,22 +1905,6 @@ export default class Detail extends React.Component {
                             </div>
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <SelectFieldGroup
-                                    id="gradodDisfuncionSexualInput" 
-                                    label="Grado Disfunción Sexual"
-                                    value={this.state.result.gradodDisfuncionSexual} 
-                                    onChange={this.handleValueChange}
-                                    name='gradodDisfuncionSexual'
-                                    options={[
-                                        {value: 0, label: "-"},
-                                        {value: 1, label: "I"},
-                                        {value: 2, label: "II"},
-                                        {value: 2, label: "III"},
-                                        {value: 2, label: "IV"},
-                                    ]}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-lg-3">
-                                <SelectFieldGroup
                                     id="soasInput" 
                                     label="SAOS"
                                     value={this.state.result.SAOS} 
@@ -1930,6 +1913,37 @@ export default class Detail extends React.Component {
                                     options={[
                                         {value: 0, label: "No"},
                                         {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                        </div>
+                        <div className="row"> 
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="epocInput" 
+                                    label="EPOC"
+                                    value={this.state.result.EPOC} 
+                                    onChange={this.handleValueChange}
+                                    name='EPOC'
+                                    options={[
+                                        {value: 0, label: "No"},
+                                        {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-lg-3">
+                                <SelectFieldGroup
+                                    id="gradodEPOCInput" 
+                                    label="Grado EPOC"
+                                    value={this.state.result.gradodEPOC} 
+                                    onChange={this.handleValueChange}
+                                    name='gradodEPOC'
+                                    options={[
+                                        {value: 0, label: "-"},
+                                        {value: 1, label: "I"},
+                                        {value: 2, label: "II"},
+                                        {value: 2, label: "III"},
+                                        {value: 2, label: "IV"},
                                     ]}
                                     />
                             </div>
