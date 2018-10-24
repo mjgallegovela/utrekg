@@ -1,5 +1,6 @@
 class Result {
     constructor(){
+        this.id = null;
         this.fecha_registro = null;
         // Datos
         this.creatorUser = "";
@@ -16,7 +17,7 @@ class Result {
         this.IMC = 0;	
         this.perimetro_torax = 0;
         this.perimetro_abd = 0;
-        this.pectus_normal = 0;
+        this.pectus_normal = 1;
         this.TAS_MSD = 0;
         this.TAD_MSD = 0;	
         this.TAS_MSI = 0;

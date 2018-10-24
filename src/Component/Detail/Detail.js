@@ -91,6 +91,7 @@ export default class Detail extends React.Component {
                         that.setState({
                             id: strId,
                             exists: true,
+                            result: result,
                             message: {txt: "Guardado con éxito", type: "success", showClose: true}});
                     }).catch((error) => {
                         that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
@@ -1994,7 +1995,7 @@ export default class Detail extends React.Component {
                                 label="Hb"
                                 placeholder="Hb"
                                 onChange={this.handleValueChange}
-                                name='Hb'
+                                name='hb'
                                 value={this.state.result.hb}
                             />
                         </div> 
