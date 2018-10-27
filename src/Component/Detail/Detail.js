@@ -833,10 +833,24 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-md-4">
                                 <SelectFieldGroup
                                     id="GLP1_input" 
-                                    label="GLP1"
-                                    value={this.state.result.GLP1} 
+                                    label="Test Morisky Green"
+                                    value={this.state.result.test_morisky_green} 
                                     onChange={this.handleValueChange}
-                                    name='GLP1'
+                                    name='test_morisky_green'
+                                    options={[
+                                        {value: 0, label: ""}, 
+                                        {value: 1, label: "Cumplidas (No a las 4 preguntas)"},
+                                        {value: 2, label: "No Cumplidas (Sí a una o  más)"}
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4">
+                                <SelectFieldGroup
+                                    id="INSULINA_input" 
+                                    label="Insulina"
+                                    value={this.state.result.INSULINA} 
+                                    onChange={this.handleValueChange}
+                                    name='INSULINA'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
                                     />
                             </div>
@@ -871,6 +885,8 @@ export default class Detail extends React.Component {
                                     }}
                                 />    
                         </div>
+                    </div>
+                    <div className="row">    
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <SelectFieldGroup
                                 id="sexoInput" 
@@ -901,8 +917,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="PRInput"
                                 type="number"
-                                label="PR"
-                                placeholder="PR"
+                                label="PR (milisegundos)"
+                                placeholder="PR (milisegundos)"
                                 onChange={this.handleValueChange}
                                 name='PR'
                                 value={this.state.result.PR}
@@ -912,8 +928,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="QRSInput"
                                 type="number"
-                                label="QRS"
-                                placeholder="QRS"
+                                label="QRS (milisegundos)"
+                                placeholder="QRS (milisegundos)"
                                 onChange={this.handleValueChange}
                                 name='QRS'
                                 value={this.state.result.QRS}
@@ -923,7 +939,7 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="QTcInput"
                                 type="number"
-                                label="QTc"
+                                label="QTc (milisegundos)"
                                 placeholder="QTc"
                                 onChange={this.handleValueChange}
                                 name='QTc'
@@ -931,50 +947,44 @@ export default class Detail extends React.Component {
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
-                                id="EjePInput" 
+                            <FieldGroup
+                                id="EjePInput"
+                                type="number"
                                 label="Eje P"
-                                value={this.state.result.EJE_P} 
+                                placeholder="Eje P"
                                 onChange={this.handleValueChange}
                                 name='EJE_P'
-                                options={[
-                                    {value: 0, label: "Positivo"},
-                                    {value: 1, label: "Negativo"}
-                                ]}
-                                />    
+                                value={this.state.result.EJE_P} 
+                                />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
-                                id="EjeQRSInput" 
+                            <FieldGroup
+                                id="EjeQRSInput"
+                                type="number"
                                 label="Eje QRS"
-                                value={this.state.result.EJE_QRS} 
+                                placeholder="Eje QRS"
                                 onChange={this.handleValueChange}
                                 name='EJE_QRS'
-                                options={[
-                                    {value: 0, label: "Positivo"},
-                                    {value: 1, label: "Negativo"}
-                                ]}
-                                />    
+                                value={this.state.result.EJE_QRS} 
+                                />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
-                                id="EjeTInput" 
+                            <FieldGroup
+                                id="EjeTInput"
+                                type="number"
                                 label="Eje T"
-                                value={this.state.result.EJE_T} 
+                                placeholder="Eje T"
                                 onChange={this.handleValueChange}
                                 name='EJE_T'
-                                options={[
-                                    {value: 0, label: "Positivo"},
-                                    {value: 1, label: "Negativo"}
-                                ]}
-                                />    
+                                value={this.state.result.EJE_T} 
+                                />                                  
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <FieldGroup
                                 id="P_alturaInput"
                                 type="number"
-                                label="P Altura"
-                                placeholder="P Altura"
+                                label="P Altura (mm)"
+                                placeholder="P Altura (mm)"
                                 onChange={this.handleValueChange}
                                 name='P_altura'
                                 value={this.state.result.P_altura}
@@ -1116,8 +1126,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_I_Input"
                                 type="number"
-                                label="R en I"
-                                placeholder="R en I"
+                                label="R en I (mm)"
+                                placeholder="R en I (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_I'
                                 value={this.state.result.R_en_I}
@@ -1127,8 +1137,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_III_Input"
                                 type="number"
-                                label="R en III"
-                                placeholder="R en III"
+                                label="R en III (mm)"
+                                placeholder="R en III (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_III'
                                 value={this.state.result.R_en_III}
@@ -1138,8 +1148,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_aVF_Input"
                                 type="number"
-                                label="R en aVF"
-                                placeholder="R en aVF"
+                                label="R en AVF (mm)"
+                                placeholder="R en AVF (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_aVF'
                                 value={this.state.result.R_en_aVF}
@@ -1149,8 +1159,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_aVL_Input"
                                 type="number"
-                                label="R en aVL"
-                                placeholder="R en aVL"
+                                label="R en AVL (mm)"
+                                placeholder="R en AVL (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_aVL'
                                 value={this.state.result.R_en_aVL}
@@ -1160,8 +1170,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_V2_Input"
                                 type="number"
-                                label="R en V2"
-                                placeholder="R en V2"
+                                label="R en V2 (mm)"
+                                placeholder="R en V2 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V2'
                                 value={this.state.result.R_en_V2}
@@ -1171,8 +1181,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_V5_Input"
                                 type="number"
-                                label="R en V5"
-                                placeholder="R en V5"
+                                label="R en V5 (mm)"
+                                placeholder="R en V5 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V5'
                                 value={this.state.result.R_en_V5}
@@ -1182,8 +1192,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="R_en_V6_Input"
                                 type="number"
-                                label="R en V6"
-                                placeholder="R en V6"
+                                label="R en V6 (mm)"
+                                placeholder="R en V6 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V6'
                                 value={this.state.result.R_en_V6}
@@ -1195,8 +1205,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_I_Input"
                                 type="number"
-                                label="S en I"
-                                placeholder="S en I"
+                                label="S en I (mm)"
+                                placeholder="S en I (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_I'
                                 value={this.state.result.S_en_I}
@@ -1206,8 +1216,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_II_Input"
                                 type="number"
-                                label="S en II"
-                                placeholder="S en II"
+                                label="S en II (mm)"
+                                placeholder="S en II (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_II'
                                 value={this.state.result.S_en_II}
@@ -1217,8 +1227,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_III_Input"
                                 type="number"
-                                label="S en III"
-                                placeholder="S en III"
+                                label="S en III (mm)"
+                                placeholder="S en III (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_III'
                                 value={this.state.result.S_en_III}
@@ -1228,8 +1238,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_V1_Input"
                                 type="number"
-                                label="S en V1"
-                                placeholder="S en V1"
+                                label="S en V1 (mm)"
+                                placeholder="S en V1 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V1'
                                 value={this.state.result.S_en_V1}
@@ -1239,8 +1249,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_V3_Input"
                                 type="number"
-                                label="S en V3"
-                                placeholder="S en V3"
+                                label="S en V3 (mm)"
+                                placeholder="S en V3 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V3'
                                 value={this.state.result.S_en_V3}
@@ -1250,8 +1260,8 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="S_en_V6_Input"
                                 type="number"
-                                label="S en V6"
-                                placeholder="S en V6"
+                                label="S en V6 (mm)"
+                                placeholder="S en V6 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V6'
                                 value={this.state.result.S_en_V6}
@@ -1295,24 +1305,14 @@ export default class Detail extends React.Component {
                             <FieldGroup
                                 id="Sokolow_Input"
                                 type="number"
-                                label="Indice de Sokolow"
-                                placeholder="Indice de Sokolow"
+                                label="Indice de Sokolow-Lyon"
+                                placeholder="Indice de Sokolow-Lyon"
                                 onChange={this.handleValueChange}
                                 name='Sokolow'
                                 value={this.state.result.Sokolow}
                             />
                         </div> 
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="Lyon_Input"
-                                type="number"
-                                label="Indice de Lyon"
-                                placeholder="Indice de Lyon"
-                                onChange={this.handleValueChange}
-                                name='Lyon'
-                                value={this.state.result.Lyon}
-                            />
-                        </div> 
+                        
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <FieldGroup
                                 id="Cornell_Input"
@@ -1359,100 +1359,6 @@ export default class Detail extends React.Component {
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <SelectFieldGroup
-                                id="T_positivasInput" 
-                                label="T Positivas"
-                                value={this.state.result.T_positivas} 
-                                onChange={this.handleValueChange}
-                                name='T_positivas'
-                                options={[
-                                    {value: 0, label: "Sí"},
-                                    {value: 1, label: "T negativas asimétricas"},
-                                    {value: 2, label: "T negativas simétricas"},
-                                ]}
-                                />   
-                        </div> 
-                    </div>
-                    <div className="row">    
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="anchura_T_Input"
-                                type="number"
-                                label="Anchura T"
-                                placeholder="Anchura T"
-                                onChange={this.handleValueChange}
-                                name='anchura_T'
-                                value={this.state.result.anchura_T}
-                            />
-                        </div> 
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="altura_T_inf_Input"
-                                type="number"
-                                label="Altura T Inferior"
-                                placeholder="Altura T Inferior"
-                                onChange={this.handleValueChange}
-                                name='altura_T_inf'
-                                value={this.state.result.altura_T_inf}
-                            />
-                        </div> 
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="altura_T_lat_Input"
-                                type="number"
-                                label="Altura T Lateral"
-                                placeholder="Altura T Lateral"
-                                onChange={this.handleValueChange}
-                                name='altura_T_lat'
-                                value={this.state.result.altura_T_lat}
-                            />
-                        </div> 
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <FieldGroup
-                                id="altura_T_precord_Input"
-                                type="number"
-                                label="Altura T Precord"
-                                placeholder="Altura T Precord"
-                                onChange={this.handleValueChange}
-                                name='altura_T_precord'
-                                value={this.state.result.altura_T_precord}
-                            />
-                        </div> 
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
-                                id="T_plana_Input" 
-                                label="T Plana"
-                                value={this.state.result.T_plana} 
-                                onChange={this.handleValueChange}
-                                name='T_plana'
-                                options={[
-                                    {value: 0, label: "No"},
-                                    {value: 1, label: "Sí, lateral"},
-                                    {value: 2, label: "Sí, inferior"},
-                                    {value: 3, label: "Precordiales Izquierdas"},
-                                    {value: 4, label: "Inferolateral"},
-                                    {value: 5, label: "Inferolateral y precordiales"},
-                                ]}
-                                />   
-                        </div>
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
-                                id="T_negativas_Input" 
-                                label="T Negativas"
-                                value={this.state.result.T_negativas} 
-                                onChange={this.handleValueChange}
-                                name='T_negativas'
-                                options={[
-                                    {value: 0, label: "No"},
-                                    {value: 1, label: "Sí, lateral"},
-                                    {value: 2, label: "Sí, inferior"},
-                                    {value: 3, label: "Precordiales Izquierdas"},
-                                    {value: 4, label: "Inferolateral"},
-                                    {value: 5, label: "Inferolateral y precordiales"},
-                                ]}
-                                />   
-                        </div>
-                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                            <SelectFieldGroup
                                 id="extrasistoles_Input" 
                                 label="Extrasístoles"
                                 value={this.state.result.extrasistoles} 
@@ -1467,6 +1373,90 @@ export default class Detail extends React.Component {
                                 ]}
                                 />   
                         </div>
+                    </div>
+
+                    <div className="row">    
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="t_cara_inferior_Input" 
+                                label="T Cara Inferior (II, III y AVF)"
+                                value={this.state.result.t_cara_inferior} 
+                                onChange={this.handleValueChange}
+                                name='t_cara_inferior'
+                                options={[
+                                    {value: 0, label: ""},
+                                    {value: 1, label: "Positiva"},
+                                    {value: 2, label: "Planos"},
+                                    {value: 3, label: "Negativas asimétrica"},
+                                    {value: 4, label: "Negativas simétrica"},
+                                ]}
+                                />   
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="t_cara_lateral_Input" 
+                                label="T Cara Lateral (I y AVL)"
+                                value={this.state.result.t_cara_lateral} 
+                                onChange={this.handleValueChange}
+                                name='t_cara_lateral'
+                                options={[
+                                    {value: 0, label: ""},
+                                    {value: 1, label: "Positiva"},
+                                    {value: 2, label: "Planos"},
+                                    {value: 3, label: "Negativas asimétrica"},
+                                    {value: 4, label: "Negativas simétrica"},
+                                ]}
+                                />   
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="t_cara_septal_Input" 
+                                label="T Cara Septal (V1, V2)"
+                                value={this.state.result.t_cara_septal} 
+                                onChange={this.handleValueChange}
+                                name='t_cara_septal'
+                                options={[
+                                    {value: 0, label: ""},
+                                    {value: 1, label: "Positiva"},
+                                    {value: 2, label: "Planos"},
+                                    {value: 3, label: "Negativas asimétrica"},
+                                    {value: 4, label: "Negativas simétrica"},
+                                ]}
+                                />   
+                        </div> 
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="t_cara_anterior_Input" 
+                                label="T Cara Anterior (V3, V4)"
+                                value={this.state.result.t_cara_anterior} 
+                                onChange={this.handleValueChange}
+                                name='t_cara_anterior'
+                                options={[
+                                    {value: 0, label: ""},
+                                    {value: 1, label: "Positiva"},
+                                    {value: 2, label: "Planos"},
+                                    {value: 3, label: "Negativas asimétrica"},
+                                    {value: 4, label: "Negativas simétrica"},
+                                ]}
+                                />   
+                        </div> 
+
+                        <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <SelectFieldGroup
+                                id="t_cara_lateral_alta_Input" 
+                                label="T Cara Lateral Alta (V5, V6)"
+                                value={this.state.result.t_cara_lateral_alta} 
+                                onChange={this.handleValueChange}
+                                name='t_cara_lateral_alta'
+                                options={[
+                                    {value: 0, label: ""},
+                                    {value: 1, label: "Positiva"},
+                                    {value: 2, label: "Planos"},
+                                    {value: 3, label: "Negativas asimétrica"},
+                                    {value: 4, label: "Negativas simétrica"},
+                                ]}
+                                />   
+                        </div> 
                     </div>   
                 </div>                
                     

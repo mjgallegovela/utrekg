@@ -65,7 +65,8 @@ class Result {
         this.SGLT2 = 0;
         this.GLP1 = 0;
         this.INSULINA = 0;
-
+        this.test_morisky_green = 0;
+        
         // ECG
         this.fecha_ECG	 = "";
         this.ritmo = 0;//select
@@ -73,9 +74,9 @@ class Result {
         this.PR = 0;
         this.QRS = 0;
         this.QTc = 0;
-        this.EJE_P = 0;
-        this.EJE_QRS = 0;
-        this.EJE_T = 0;
+        this.EJE_P = null;
+        this.EJE_QRS = null;
+        this.EJE_T = null;
         this.P_anchura = 0;
         this.P_altura = 0;
         this.P_mellada = 0; //Boolean
@@ -104,18 +105,15 @@ class Result {
         this.bloqueos_rama = 0;  //select
         this.hemibloqueos = 0;  //select
         this.Sokolow = 0;
-        this.Lyon = 0;
         this.Cornell = 0;
         this.ST = 0;  //select
         this.ST_alterado = 0; //select
-        this.T_positivas = 0; //select
-        this.anchura_T = 0;
-        this.altura_T_inf = 0;
-        this.altura_T_lat = 0;
-        this.altura_T_precord = 0;
-        this.T_plana = 0;  //select
-        this.T_negativas = 0; //select
         this.extrasistoles = 0; //select
+        this.t_cara_inferior = 0; //select
+        this.t_cara_lateral = 0; //select
+        this.t_cara_septal = 0; //select
+        this.t_cara_anterior = 0; //select
+        this.t_cara_lateral_alta = 0; //select
 
         // AP
         this.fumador = 0;
