@@ -72,7 +72,7 @@ class Result {
         
         // ECG
         this.fecha_ECG	 = "";
-        this.ritmo = 0;//select
+        this.ritmo = 0; //select
         this.FC = 0;
         this.PR = 0;
         this.QRS = 0;
@@ -125,10 +125,10 @@ class Result {
         this.sal = 0; // select
         this.dieta_mediterranea	 = 0; // select
         this.ejercicio_fisico = 0; // select
-        this.HTA = 0;
+        this.HTA = 0; // boolean
         this.años_HTA = 0;
-        this.HTA_secundaria = 0;
-        this.causa_HTA_secund = 0;
+        this.HTA_secundaria = 0; // boolean
+        this.causa_HTA_secund = 0; // boolean
         this.Dgtco_HTA = 0;
         this.AF_HTA = 0;
         this.AF_MS = 0;
@@ -157,28 +157,28 @@ class Result {
         // Analitica
         this.analitica_basal = 0;
         this.fecha_analitica = "";
-        this.hb = 0;
-        this.hcto = 0;
-        this.VCM = 0;
-        this.CHCM = 0;
-        this.plaquetas = 0;
-        this.glucosa = 0;
-        this.hb1Ac = 0;
-        this.urea = 0;
-        this.creatinina = 0;
-        this.FG = 0;
-        this.Na = 0;
-        this.K = 0;
-        this.GOT = 0;
-        this.GPT = 0;
-        this.GGT = 0;
-        this.CT = 0;
-        this.LDL = 0;
-        this.HDL = 0;
-        this.TG = 0;
-        this.microalbuminuria = 0;
-        this.cociente_alb_cr = 0;
-        this.proteinuria = 0;
+        this.hb = "";
+        this.hcto = "";
+        this.VCM = "";
+        this.CHCM = "";
+        this.plaquetas = "";
+        this.glucosa = "";
+        this.hb1Ac = "";
+        this.urea = "";
+        this.creatinina = "";
+        this.FG = "";
+        this.Na = "";
+        this.K = "";
+        this.GOT = "";
+        this.GPT = "";
+        this.GGT = "";
+        this.CT = "";
+        this.LDL = "";
+        this.HDL = "";
+        this.TG = "";
+        this.microalbuminuria = "";
+        this.cociente_alb_cr = "";
+        this.proteinuria = "";
 
         // Pruebas
         this.mapa_reciente = 0; //bool
