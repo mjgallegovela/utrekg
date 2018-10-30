@@ -830,9 +830,30 @@ export default class Detail extends React.Component {
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
                                     />
                             </div>
+                            
                             <div className="col-xs-12 col-sm-6 col-md-4">
                                 <SelectFieldGroup
                                     id="GLP1_input" 
+                                    label="GLP1"
+                                    value={this.state.result.GLP1} 
+                                    onChange={this.handleValueChange}
+                                    name='GLP1'
+                                    options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4">
+                                <SelectFieldGroup
+                                    id="INSULINA_input" 
+                                    label="Insulina"
+                                    value={this.state.result.INSULINA} 
+                                    onChange={this.handleValueChange}
+                                    name='INSULINA'
+                                    options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4">
+                                <SelectFieldGroup
+                                    id="test_morisky_green_input" 
                                     label="Test Morisky Green"
                                     value={this.state.result.test_morisky_green} 
                                     onChange={this.handleValueChange}
@@ -842,26 +863,6 @@ export default class Detail extends React.Component {
                                         {value: 1, label: "Cumplidas (No a las 4 preguntas)"},
                                         {value: 2, label: "No Cumplidas (Sí a una o  más)"}
                                     ]}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4">
-                                <SelectFieldGroup
-                                    id="INSULINA_input" 
-                                    label="Insulina"
-                                    value={this.state.result.INSULINA} 
-                                    onChange={this.handleValueChange}
-                                    name='INSULINA'
-                                    options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4">
-                                <SelectFieldGroup
-                                    id="INSULINA_input" 
-                                    label="Insulina"
-                                    value={this.state.result.INSULINA} 
-                                    onChange={this.handleValueChange}
-                                    name='INSULINA'
-                                    options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
                                     />
                             </div>
                         </div>
@@ -1473,9 +1474,8 @@ export default class Detail extends React.Component {
                                     onChange={this.handleValueChange}
                                     name='fumador'
                                     options={[
-                                        {value: 0, label: "No"},
+                                        {value: 0, label: "No ( > 1 año )"},
                                         {value: 1, label: "Sí"},
-                                        {value: 2, label: "Exfumador"},
                                     ]}
                                     />
                             </div>
@@ -1498,9 +1498,9 @@ export default class Detail extends React.Component {
                                     onChange={this.handleValueChange}
                                     name='alcohol'
                                     options={[
-                                        {value: 0, label: "No"},
-                                        {value: 1, label: "Sí"},
-                                        {value: 2, label: "Exalcohólico"},
+                                        {value: 0, label: "Abstinente"},
+                                        {value: 1, label: "Moderado (M: 0-25 gr/día, H: 0-40 gr/día)"},
+                                        {value: 2, label: "Excesivo (M: > 25 gr/día, H: > 40 gr/día)"},
                                     ]}
                                     />
                             </div>
@@ -1539,6 +1539,20 @@ export default class Detail extends React.Component {
                                     options={[
                                         {value: 0, label: "No"},
                                         {value: 1, label: "Sí"},
+                                    ]}
+                                    />
+                            </div>
+                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <SelectFieldGroup
+                                    id="ejercicio_fisico_Input" 
+                                    label="Ejercicio físico"
+                                    value={this.state.result.ejercicio_fisico} 
+                                    onChange={this.handleValueChange}
+                                    name='ejercicio_fisico'
+                                    options={[
+                                        {value: 0, label: "No (Nada)"},
+                                        {value: 1, label: "Moderado (1 hora, 3 días a la semana)"},
+                                        {value: 2, label: "Diario"},
                                     ]}
                                     />
                             </div>
@@ -1909,7 +1923,8 @@ export default class Detail extends React.Component {
                                     name='SAOS'
                                     options={[
                                         {value: 0, label: "No"},
-                                        {value: 1, label: "Sí"},
+                                        {value: 1, label: "SAOS, sin TTO con CPAP"},
+                                        {value: 2, label: "SAOS, con TTO con CPAP nocturna"},
                                     ]}
                                     />
                             </div>
