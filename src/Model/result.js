@@ -11,18 +11,21 @@ class Result {
         this.visita = 1;
         this.sexo = "H";
         this.fecha_nacimiento = "";
-        this.edad_inclusion = 0;
-        this.peso = 0;	
-        this.altura = 0;	
-        this.IMC = 0;	
-        this.perimetro_torax = 0;
-        this.perimetro_abd = 0;
+        this.edad_inclusion = "";
+        this.peso = "";	
+        this.altura = "";	
+        this.IMC = "";	
+        this.perimetro_torax = "";
+        this.perimetro_abd = "";
         this.pectus_normal = 1;
-        this.TAS_MSD = 0;
-        this.TAD_MSD = 0;	
-        this.TAS_MSI = 0;
-        this.TAD_MSI = 0;
+        this.TAS_MSD = "";
+        this.TAD_MSD = "";	
+        this.TAS_MSI = "";
+        this.TAD_MSI = "";
         this.expl_patolog = "";
+        this.fumador = 0; // Select
+        this.alcohol = 0; // Select
+
 
         // TTO
         this.IECA = 0;
@@ -65,7 +68,7 @@ class Result {
         this.SGLT2 = 0;
         this.GLP1 = 0;
         this.INSULINA = 0;
-        this.test_morisky_green = 0;
+        this.test_morisky_green = 0; // select
         
         // ECG
         this.fecha_ECG	 = "";
@@ -116,12 +119,12 @@ class Result {
         this.t_cara_lateral_alta = 0; //select
 
         // AP
-        this.fumador = 0;
-        this.cigarrillos = 0;
-        this.alcohol = 0;
-        this.copas = 0;
-        this.sal = 0;
-        this.dieta_mediterranea	 = 0;
+        this.fumador = 0; // select
+        this.cigarrillos = 0; // number
+        this.alcohol = 0; // select
+        this.sal = 0; // select
+        this.dieta_mediterranea	 = 0; // select
+        this.ejercicio_fisico = 0; // select
         this.HTA = 0;
         this.años_HTA = 0;
         this.HTA_secundaria = 0;

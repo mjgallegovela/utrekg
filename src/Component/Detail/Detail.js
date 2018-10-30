@@ -249,6 +249,7 @@ export default class Detail extends React.Component {
                 </Nav>
                 
                 {this.state.tabkey === "1" && (
+                    /* DATOS PERSONALES */
                     <div className="tab-content">
                         <div className='row'>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -410,6 +411,7 @@ export default class Detail extends React.Component {
                     </div>
                 )}
                 {this.state.tabkey === "2" && (
+                    /* TTO */
                     <div className="tab-content">
                         <div className='row'>
                             <div className="col-xs-12 col-sm-6 col-md-4">
@@ -860,8 +862,8 @@ export default class Detail extends React.Component {
                                     name='test_morisky_green'
                                     options={[
                                         {value: 0, label: ""}, 
-                                        {value: 1, label: "Cumplidas (No a las 4 preguntas)"},
-                                        {value: 2, label: "No Cumplidas (Sí a una o  más)"}
+                                        {value: 1, label: "Cumplidor (No a las 4 preguntas)"},
+                                        {value: 2, label: "No Cumplidor (Sí a una o  más)"}
                                     ]}
                                     />
                             </div>
@@ -1387,9 +1389,9 @@ export default class Detail extends React.Component {
                                 options={[
                                     {value: 0, label: ""},
                                     {value: 1, label: "Positiva"},
-                                    {value: 2, label: "Planos"},
-                                    {value: 3, label: "Negativas asimétrica"},
-                                    {value: 4, label: "Negativas simétrica"},
+                                    {value: 2, label: "Plana"},
+                                    {value: 3, label: "Negativa asimétrica"},
+                                    {value: 4, label: "Negativa simétrica"},
                                 ]}
                                 />   
                         </div> 
@@ -1403,9 +1405,9 @@ export default class Detail extends React.Component {
                                 options={[
                                     {value: 0, label: ""},
                                     {value: 1, label: "Positiva"},
-                                    {value: 2, label: "Planos"},
-                                    {value: 3, label: "Negativas asimétrica"},
-                                    {value: 4, label: "Negativas simétrica"},
+                                    {value: 2, label: "Plana"},
+                                    {value: 3, label: "Negativa asimétrica"},
+                                    {value: 4, label: "Negativa simétrica"},
                                 ]}
                                 />   
                         </div> 
@@ -1419,9 +1421,9 @@ export default class Detail extends React.Component {
                                 options={[
                                     {value: 0, label: ""},
                                     {value: 1, label: "Positiva"},
-                                    {value: 2, label: "Planos"},
-                                    {value: 3, label: "Negativas asimétrica"},
-                                    {value: 4, label: "Negativas simétrica"},
+                                    {value: 2, label: "Plana"},
+                                    {value: 3, label: "Negativa asimétrica"},
+                                    {value: 4, label: "Negativa simétrica"},
                                 ]}
                                 />   
                         </div> 
@@ -1435,9 +1437,9 @@ export default class Detail extends React.Component {
                                 options={[
                                     {value: 0, label: ""},
                                     {value: 1, label: "Positiva"},
-                                    {value: 2, label: "Planos"},
-                                    {value: 3, label: "Negativas asimétrica"},
-                                    {value: 4, label: "Negativas simétrica"},
+                                    {value: 2, label: "Plana"},
+                                    {value: 3, label: "Negativa asimétrica"},
+                                    {value: 4, label: "Negativa simétrica"},
                                 ]}
                                 />   
                         </div> 
@@ -1452,15 +1454,14 @@ export default class Detail extends React.Component {
                                 options={[
                                     {value: 0, label: ""},
                                     {value: 1, label: "Positiva"},
-                                    {value: 2, label: "Planos"},
-                                    {value: 3, label: "Negativas asimétrica"},
-                                    {value: 4, label: "Negativas simétrica"},
+                                    {value: 2, label: "Plana"},
+                                    {value: 3, label: "Negativa asimétrica"},
+                                    {value: 4, label: "Negativa simétrica"},
                                 ]}
                                 />   
                         </div> 
                     </div>   
                 </div>                
-                    
                 )}
                 {this.state.tabkey === "4" && (
                     /* AP */
@@ -1503,17 +1504,6 @@ export default class Detail extends React.Component {
                                         {value: 2, label: "Excesivo (M: > 25 gr/día, H: > 40 gr/día)"},
                                     ]}
                                     />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-lg-3">
-                                <FieldGroup
-                                    id="copas_Input"
-                                    type="number"
-                                    label="Copas"
-                                    placeholder="Copas"
-                                    onChange={this.handleValueChange}
-                                    name='copas'
-                                    value={this.state.result.copas}
-                                />
                             </div> 
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <SelectFieldGroup
@@ -1961,10 +1951,10 @@ export default class Detail extends React.Component {
                             </div>
                         </div>
                     </div>
-                )}
-                
+                )} 
                 {this.state.tabkey === "5" && (
-                <div className="tab-content">
+                    /* ANALITICA */
+                    <div className="tab-content">
                     <div className='row'>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <SelectFieldGroup
@@ -2240,7 +2230,8 @@ export default class Detail extends React.Component {
                 </div>
                 )}
                 {this.state.tabkey === "6" && (
-                <div className="tab-content">
+                    /* PRUEBAS */
+                    <div className="tab-content">
                     <div className='row'>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <SelectFieldGroup
