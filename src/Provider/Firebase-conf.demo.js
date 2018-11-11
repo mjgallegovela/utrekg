@@ -7,4 +7,4 @@ const Config = {
     messagingSenderId: ""
 };
 
-export default Config;
+module.exports = Config;
