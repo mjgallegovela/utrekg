@@ -1,12 +1,18 @@
 import React from 'react';
 import './Detail.css';
 import {Button, Nav, NavItem, Glyphicon} from 'react-bootstrap';
-import Result from '../../Model/result';
+//import Result from '../../Model/result';
+
+import Customer from '../../Model/Customer';
+import Session from '../../Model/Session';
+
 import { map } from 'lodash';
 import DatePicker from '../Form/DatePicker/DatePicker';
 import FieldGroup from '../Form/FieldGroup';
 import SelectFieldGroup from '../Form/SelectFieldGroup';
 import CustomModal from '../Form/Modal/CustomModal';
+
+var moment = require('moment');
 
 export default class Detail extends React.Component {
     constructor(props) {
@@ -15,15 +21,17 @@ export default class Detail extends React.Component {
         this.handleValueChange = this.handleValueChange.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.resetState = this.resetState.bind(this);
-        this.handleChangeDate = this.handleChangeDate.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
-            result: new Result(), 
+            result: new Customer(), 
+            visit: 0,
+            visits: [new Session()],
             id: this.props.id!== undefined? this.props.id: null, 
             message: {txt: "", type: "info", showClose: false},
-            tabkey: "1"    
+            tabkey: "1" ,
+            
         };
     }
 
@@ -42,20 +50,40 @@ export default class Detail extends React.Component {
     load() {
         if(this.state.exists) {
             this.showMessage("Cargando...", "info", false);
-            var docRef = this.props.fb.firestore().collection("results").doc(this.state.id);
+            var docRef = this.props.fb.firestore().collection("customers").doc(this.state.id);
             var that = this;
             docRef.get().then(function(doc) {
-                that.setState({
-                    result: doc.data(), 
-                    message: {txt: "", type: "info", showClose: false}});
+                let customer = doc.data();
+                that.props.fb.firestore().collection("sessions").where("customer", "==", that.state.id).orderBy("fecha_visita").get().then(
+                    querySnapshot => {
+
+                        let visitCollection = [];
+                        querySnapshot.forEach(doc => {
+                            visitCollection.push(doc.data());
+                        });
+
+                        if(visitCollection.length <= 0) {
+                            visitCollection.push(new Session());
+                        }
+
+                        that.setState({
+                            result: customer, 
+                            visits: visitCollection,
+                            visit: visitCollection.length - 1,
+                            message: {txt: "", type: "info", showClose: false}});
+                    })
+                console.log(that.state.visits);
             }).catch(function(error) {
+                console.log(error);
                 that.setState({
-                    result: new Result(), 
+                    result: new Customer(), 
+                    visits: [new Session()], 
+                    visit: 0,
                     message: {txt: "El documento que está intentando cargar no existe.", type: "error", showClose: true, exists: false}
                 });
             });
         } else {
-            this.setState({result: new Result()});
+            this.setState({result: new Customer(), visits: [new Session()], visit: 0});
         }
     }
 
@@ -69,7 +97,7 @@ export default class Detail extends React.Component {
         this.setState({result: currentState});
         var that = this;
         if(this.state.exists){
-            this.props.fb.firestore().collection("results").doc(this.state.id).set(result)
+            this.props.fb.firestore().collection("customers").doc(this.state.id).set(result)
             .then(function(docRef) {
                 that.showMessage("Guardado con éxito", "success", true);
             })
@@ -86,7 +114,7 @@ export default class Detail extends React.Component {
                     let strId = "P" + ("" + id).padStart(10, "0"); 
                     result.id = strId;
                     result.creatorUser = this.props.fb.auth().currentUser.email;
-                    this.props.fb.firestore().collection("results").doc(strId).set(result)
+                    this.props.fb.firestore().collection("customers").doc(strId).set(result)
                     .then(() => {
                         that.setState({
                             id: strId,
@@ -103,9 +131,9 @@ export default class Detail extends React.Component {
     }
 
     handleValueChange(event) {
-        var newState = this.state.result;
-        newState[event.target.name] = event.target.value;
-        this.setState({result: newState});
+        var newState = this.state.visits;
+        newState[this.state.visit][event.target.name] = event.target.value;
+        this.setState({visits: newState});
     }
 
     handleCloseModal() {
@@ -120,20 +148,14 @@ export default class Detail extends React.Component {
         this.setState({
             exists: props.exists === 'true',
             loaded: false,
-            result: new Result(), 
             id: this.props.id!== undefined? this.props.id: null, 
             message: {txt: "", type: "info", showClose: false},
-            tabkey: "1"         
+            tabkey: "1",
+            result: new Customer(), 
+            visit: 0,
+            visits: [new Session()]
         });
         
-    }
-
-    handleChangeDate(date) {
-        var result = this.state.result;
-        result.fecha_nacimiento = date;
-        this.setState({
-          result: result
-        });
     }
 
     showMessage(txt, type, showClose){
@@ -141,6 +163,32 @@ export default class Detail extends React.Component {
     }
 
     render() {
+
+        let visitsOptions = [];
+        let index = 1;
+
+        map(this.state.visits, (value, key) => {
+            index = (key + 1);
+            let momentDate = moment(new Date(value.fecha_visita));
+            visitsOptions.push({value: key, label: index + "ª visita (" + momentDate.format("DD-MM-YYYY") + ")"},)
+        });
+
+        /*
+        
+        [
+            {value: 01,  label: "1ª"},
+            {value: 02,  label: "2ª"},
+            {value: 03,  label: "3ª"},
+            {value: 04,  label: "4ª"},
+            {value: 05,  label: "5ª"},
+            {value: 06,  label: "6ª"},
+            {value: 07,  label: "7ª"},
+            {value: 08,  label: "8ª"},
+            {value: 09,  label: "9ª"},
+            {value: 10,  label: "10ª"}
+        ]
+        */
+
         const result = (
             <div>
                 <div className="pageTitle">
@@ -206,24 +254,51 @@ export default class Detail extends React.Component {
                 </div>
                 <div className="row">
                     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <DatePicker 
+                            id="fecha_nacimiento_datepicker"
+                            label="Fecha de nacimiento"
+                            value={this.state.result.fecha_nacimiento} 
+                            onChange={
+                                (isoString) => {
+                                    
+                                    var stateResult = this.state.result;
+                                    stateResult.fecha_nacimiento = isoString;
+                                    this.setState({result: stateResult});
+                                }}
+                            />    
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <SelectFieldGroup
+                            id="sexoInput" 
+                            label="Sexo"
+                            value={this.state.result.sexo} 
+                            onChange={this.handleValueChange}
+                            name='sexo'
+                            options={[{value: "H", label: "Hombre"},{value: "M", label: "Mujer"}]}
+                            />
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                        <FieldGroup
+                            id="edad_inclusionInput"
+                            type="number"
+                            label="Edad inclusion"
+                            placeholder="Edad inclusion"
+                            onChange={this.handleValueChange}
+                            name='edad_inclusion'
+                            value={this.state.result.edad_inclusion}
+                            />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                         <SelectFieldGroup
                             id="visitaInput" 
                             label="Visita"
                             value={this.state.result.visita} 
                             onChange={this.handleValueChange}
                             name='visita'
-                            options={[
-                                {value: 1, label: "1ª"},
-                                {value: 2, label: "2ª"},
-                                {value: 3, label: "3ª"},
-                                {value: 4, label: "4ª"},
-                                {value: 5, label: "5ª"},
-                                {value: 6, label: "6ª"},
-                                {value: 7, label: "7ª"},
-                                {value: 8, label: "8ª"},
-                                {value: 9, label: "9ª"},
-                                {value: 10, label: "10ª"}
-                            ]}
+                            options={visitsOptions}
+                        
                             />
                     </div>
                 </div>
@@ -252,41 +327,7 @@ export default class Detail extends React.Component {
                     /* DATOS PERSONALES */
                     <div className="tab-content">
                         <div className='row'>
-                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                <DatePicker 
-                                    id="fecha_nacimiento_datepicker"
-                                    label="Fecha de nacimiento"
-                                    value={this.state.result.fecha_nacimiento} 
-                                    onChange={
-                                        (isoString) => {
-                                            
-                                            var stateResult = this.state.result;
-                                            stateResult.fecha_nacimiento = isoString;
-                                            this.setState({result: stateResult});
-                                        }}
-                                    />    
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                <SelectFieldGroup
-                                    id="sexoInput" 
-                                    label="Sexo"
-                                    value={this.state.result.sexo} 
-                                    onChange={this.handleValueChange}
-                                    name='sexo'
-                                    options={[{value: "H", label: "Hombre"},{value: "M", label: "Mujer"}]}
-                                    />
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                <FieldGroup
-                                    id="edad_inclusionInput"
-                                    type="number"
-                                    label="Edad inclusion"
-                                    placeholder="Edad inclusion"
-                                    onChange={this.handleValueChange}
-                                    name='edad_inclusion'
-                                    value={this.state.result.edad_inclusion}
-                                    />
-                            </div>
+                            
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <FieldGroup
                                     id="pesoInput"
@@ -295,7 +336,7 @@ export default class Detail extends React.Component {
                                     placeholder="Peso"
                                     onChange={this.handleValueChange}
                                     name='peso'
-                                    value={this.state.result.peso}
+                                    value={this.state.visits[this.state.visit].peso}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -306,7 +347,7 @@ export default class Detail extends React.Component {
                                     placeholder="Altura"
                                     onChange={this.handleValueChange}
                                     name='altura'
-                                    value={this.state.result.altura}
+                                    value={this.state.visits[this.state.visit].altura}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -317,7 +358,7 @@ export default class Detail extends React.Component {
                                     placeholder="IMC"
                                     onChange={this.handleValueChange}
                                     name='IMC'
-                                    value={this.state.result.IMC}
+                                    value={this.state.visits[this.state.visit].IMC}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -328,7 +369,7 @@ export default class Detail extends React.Component {
                                     placeholder="Perímetro Tórax"
                                     onChange={this.handleValueChange}
                                     name='perimetro_torax'
-                                    value={this.state.result.perimetro_torax}
+                                    value={this.state.visits[this.state.visit].perimetro_torax}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -339,14 +380,14 @@ export default class Detail extends React.Component {
                                     placeholder="Perímetro abdominal"
                                     onChange={this.handleValueChange}
                                     name='perimetro_abd'
-                                    value={this.state.result.perimetro_abd}
+                                    value={this.state.visits[this.state.visit].perimetro_abd}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <SelectFieldGroup
                                     id="pnormalInput" 
                                     label="Pectus Normal"
-                                    value={this.state.result.pectus_normal} 
+                                    value={this.state.visits[this.state.visit].pectus_normal} 
                                     onChange={this.handleValueChange}
                                     name='pectus_normal'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -360,7 +401,7 @@ export default class Detail extends React.Component {
                                     placeholder="TAS MSD"
                                     onChange={this.handleValueChange}
                                     name='TAS_MSD'
-                                    value={this.state.result.TAS_MSD}
+                                    value={this.state.visits[this.state.visit].TAS_MSD}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -371,7 +412,7 @@ export default class Detail extends React.Component {
                                     placeholder="TAD MSD"
                                     onChange={this.handleValueChange}
                                     name='TAD_MSD'
-                                    value={this.state.result.TAD_MSD}
+                                    value={this.state.visits[this.state.visit].TAD_MSD}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -382,7 +423,7 @@ export default class Detail extends React.Component {
                                     placeholder="TAS MSI"
                                     onChange={this.handleValueChange}
                                     name='TAS_MSI'
-                                    value={this.state.result.TAS_MSI}
+                                    value={this.state.visits[this.state.visit].TAS_MSI}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -393,7 +434,7 @@ export default class Detail extends React.Component {
                                     placeholder="TAD_MSI"
                                     onChange={this.handleValueChange}
                                     name='TAD_MSI'
-                                    value={this.state.result.TAD_MSI}
+                                    value={this.state.visits[this.state.visit].TAD_MSI}
                                     />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -404,7 +445,7 @@ export default class Detail extends React.Component {
                                     placeholder="Exploración Patológica"
                                     onChange={this.handleValueChange}
                                     name='expl_patolog'
-                                    value={this.state.result.expl_patolog}
+                                    value={this.state.visits[this.state.visit].expl_patolog}
                                     />
                             </div>
                         </div>
@@ -418,7 +459,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="iecaInput" 
                                     label="IECA"
-                                    value={this.state.result.IECA} 
+                                    value={this.state.visits[this.state.visit].IECA} 
                                     onChange={this.handleValueChange}
                                     name='IECA'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -432,7 +473,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual IECA"
                                     onChange={this.handleValueChange}
                                     name='cual_IECA'
-                                    value={this.state.result.cual_IECA}
+                                    value={this.state.visits[this.state.visit].cual_IECA}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -443,7 +484,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis IECA"
                                     onChange={this.handleValueChange}
                                     name='dosis_IECA'
-                                    value={this.state.result.dosis_IECA}
+                                    value={this.state.visits[this.state.visit].dosis_IECA}
                                 />
                             </div>
                         </div>
@@ -452,7 +493,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ARA_IIInput" 
                                     label="ARA II"
-                                    value={this.state.result.ARA_II} 
+                                    value={this.state.visits[this.state.visit].ARA_II} 
                                     onChange={this.handleValueChange}
                                     name='ARA_II'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -466,7 +507,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual ARA II"
                                     onChange={this.handleValueChange}
                                     name='cual_ARA_II'
-                                    value={this.state.result.cual_ARA_II}
+                                    value={this.state.visits[this.state.visit].cual_ARA_II}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -477,7 +518,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis ARA II"
                                     onChange={this.handleValueChange}
                                     name='dosis_ARA_II'
-                                    value={this.state.result.dosis_ARA_II}
+                                    value={this.state.visits[this.state.visit].dosis_ARA_II}
                                 />
                             </div>
                         </div>
@@ -486,7 +527,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="DIU_TIAZInput" 
                                     label="DIU TIAZ"
-                                    value={this.state.result.DIU_TIAZ} 
+                                    value={this.state.visits[this.state.visit].DIU_TIAZ} 
                                     onChange={this.handleValueChange}
                                     name='DIU_TIAZ'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -500,7 +541,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual DIU TIAZ"
                                     onChange={this.handleValueChange}
                                     name='cual_DIU_TIAZ'
-                                    value={this.state.result.cual_DIU_TIAZ}
+                                    value={this.state.visits[this.state.visit].cual_DIU_TIAZ}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -511,7 +552,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis DIU TIAZ"
                                     onChange={this.handleValueChange}
                                     name='dosis_DIU_TIAZ'
-                                    value={this.state.result.dosis_DIU_TIAZ}
+                                    value={this.state.visits[this.state.visit].dosis_DIU_TIAZ}
                                 />
                             </div>
                         </div>
@@ -520,7 +561,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ACA_DHPInput" 
                                     label="ACA DHP"
-                                    value={this.state.result.ACA_DHP} 
+                                    value={this.state.visits[this.state.visit].ACA_DHP} 
                                     onChange={this.handleValueChange}
                                     name='ACA_DHP'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -534,7 +575,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual ACA DHP"
                                     onChange={this.handleValueChange}
                                     name='cual_ACA_DHP'
-                                    value={this.state.result.cual_ACA_DHP}
+                                    value={this.state.visits[this.state.visit].cual_ACA_DHP}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -545,7 +586,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis ACA DHP"
                                     onChange={this.handleValueChange}
                                     name='dosis_ACA_DHP'
-                                    value={this.state.result.dosis_ACA_DHP}
+                                    value={this.state.visits[this.state.visit].dosis_ACA_DHP}
                                 />
                             </div>
                         </div>
@@ -554,7 +595,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="verap_diltInput" 
                                     label="Verap Dilt"
-                                    value={this.state.result.verap_dilt} 
+                                    value={this.state.visits[this.state.visit].verap_dilt} 
                                     onChange={this.handleValueChange}
                                     name='verap_dilt'
                                     options={[{value: 0, label: "No"}, {value: 1, label: "Diltiazem"}, {value: 2, label: "Verapamil"}]}
@@ -568,7 +609,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis Verap Dilt"
                                     onChange={this.handleValueChange}
                                     name='dosis_verap_dilt'
-                                    value={this.state.result.dosis_verap_dilt}
+                                    value={this.state.visits[this.state.visit].dosis_verap_dilt}
                                 />
                             </div>
                         </div>
@@ -577,7 +618,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="alfabloqInput" 
                                     label="Alfabloq"
-                                    value={this.state.result.alfabloq} 
+                                    value={this.state.visits[this.state.visit].alfabloq} 
                                     onChange={this.handleValueChange}
                                     name='alfabloq'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -591,7 +632,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual Alfabloq"
                                     onChange={this.handleValueChange}
                                     name='cual_alfabloq'
-                                    value={this.state.result.cual_alfabloq}
+                                    value={this.state.visits[this.state.visit].cual_alfabloq}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -602,7 +643,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis Alfabloq"
                                     onChange={this.handleValueChange}
                                     name='dosis_alfabloq'
-                                    value={this.state.result.dosis_alfabloq}
+                                    value={this.state.visits[this.state.visit].dosis_alfabloq}
                                 />
                             </div>
                         </div>
@@ -611,7 +652,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="betabloqInput" 
                                     label="Betabloq"
-                                    value={this.state.result.betabloq} 
+                                    value={this.state.visits[this.state.visit].betabloq} 
                                     onChange={this.handleValueChange}
                                     name='betabloq'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -625,7 +666,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual Betabloq"
                                     onChange={this.handleValueChange}
                                     name='cual_betabloq'
-                                    value={this.state.result.cual_betabloq}
+                                    value={this.state.visits[this.state.visit].cual_betabloq}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -636,7 +677,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis Betabloq"
                                     onChange={this.handleValueChange}
                                     name='dosis_betabloq'
-                                    value={this.state.result.dosis_betabloq}
+                                    value={this.state.visits[this.state.visit].dosis_betabloq}
                                 />
                             </div>
                         </div>
@@ -645,7 +686,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="aldost_inhInput" 
                                     label="ALDOST INH"
-                                    value={this.state.result.aldost_inh} 
+                                    value={this.state.visits[this.state.visit].aldost_inh} 
                                     onChange={this.handleValueChange}
                                     name='aldost_inh'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -659,7 +700,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual ALDOST INH"
                                     onChange={this.handleValueChange}
                                     name='cual_aldost_inh'
-                                    value={this.state.result.cual_aldost_inh}
+                                    value={this.state.visits[this.state.visit].cual_aldost_inh}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -670,7 +711,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis ALDOST INH"
                                     onChange={this.handleValueChange}
                                     name='dosis_aldost_inh'
-                                    value={this.state.result.dosis_aldost_inh}
+                                    value={this.state.visits[this.state.visit].dosis_aldost_inh}
                                 />
                             </div>
                         </div>
@@ -679,7 +720,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="diu_asa_input" 
                                     label="DIU ASA"
-                                    value={this.state.result.diu_asa} 
+                                    value={this.state.visits[this.state.visit].diu_asa} 
                                     onChange={this.handleValueChange}
                                     name='diu_asa'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -693,7 +734,7 @@ export default class Detail extends React.Component {
                                     placeholder="Cual DIU ASA"
                                     onChange={this.handleValueChange}
                                     name='cual_diu_asa'
-                                    value={this.state.result.cual_diu_asa}
+                                    value={this.state.visits[this.state.visit].cual_diu_asa}
                                 />
                             </div>
                             <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
@@ -704,7 +745,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis DIU ASA"
                                     onChange={this.handleValueChange}
                                     name='dosis_diu_asa'
-                                    value={this.state.result.dosis_diu_asa}
+                                    value={this.state.visits[this.state.visit].dosis_diu_asa}
                                 />
                             </div>
                         </div>
@@ -713,7 +754,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="aliskiren_input" 
                                     label="Aliskiren"
-                                    value={this.state.result.aliskiren} 
+                                    value={this.state.visits[this.state.visit].aliskiren} 
                                     onChange={this.handleValueChange}
                                     name='aliskiren'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -727,7 +768,7 @@ export default class Detail extends React.Component {
                                     placeholder="Dosis Aliskiren"
                                     onChange={this.handleValueChange}
                                     name='dosis_aliskiren'
-                                    value={this.state.result.dosis_aliskiren}
+                                    value={this.state.visits[this.state.visit].dosis_aliskiren}
                                 />
                             </div>
                         </div>
@@ -736,7 +777,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="AAS_input" 
                                     label="AAS"
-                                    value={this.state.result.AAS} 
+                                    value={this.state.visits[this.state.visit].AAS} 
                                     onChange={this.handleValueChange}
                                     name='AAS'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -746,7 +787,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="clopidogrel_input" 
                                     label="Clopidogrel"
-                                    value={this.state.result.clopidogrel} 
+                                    value={this.state.visits[this.state.visit].clopidogrel} 
                                     onChange={this.handleValueChange}
                                     name='clopidogrel'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -756,7 +797,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ACO_input" 
                                     label="ACO"
-                                    value={this.state.result.ACO} 
+                                    value={this.state.visits[this.state.visit].ACO} 
                                     onChange={this.handleValueChange}
                                     name='ACO'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -766,7 +807,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ESTATINAS_input" 
                                     label="Estatinas"
-                                    value={this.state.result.ESTATINAS} 
+                                    value={this.state.visits[this.state.visit].ESTATINAS} 
                                     onChange={this.handleValueChange}
                                     name='ESTATINAS'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -776,7 +817,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="METFORMINA_input" 
                                     label="Metformina"
-                                    value={this.state.result.METFORMINA} 
+                                    value={this.state.visits[this.state.visit].METFORMINA} 
                                     onChange={this.handleValueChange}
                                     name='METFORMINA'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -786,7 +827,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="SFU_input" 
                                     label="SFU"
-                                    value={this.state.result.SFU} 
+                                    value={this.state.visits[this.state.visit].SFU} 
                                     onChange={this.handleValueChange}
                                     name='SFU'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -796,7 +837,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="GLICLAZ_input" 
                                     label="GLICLAZ"
-                                    value={this.state.result.GLICLAZ} 
+                                    value={this.state.visits[this.state.visit].GLICLAZ} 
                                     onChange={this.handleValueChange}
                                     name='GLICLAZ'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -806,7 +847,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="GLITAZONAS_input" 
                                     label="GLITAZONAS"
-                                    value={this.state.result.GLITAZONAS} 
+                                    value={this.state.visits[this.state.visit].GLITAZONAS} 
                                     onChange={this.handleValueChange}
                                     name='GLITAZONAS'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -816,7 +857,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="IDPP4_input" 
                                     label="IDPP4"
-                                    value={this.state.result.IDPP4} 
+                                    value={this.state.visits[this.state.visit].IDPP4} 
                                     onChange={this.handleValueChange}
                                     name='IDPP4'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -826,7 +867,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="SGLT2_input" 
                                     label="SGLT2"
-                                    value={this.state.result.SGLT2} 
+                                    value={this.state.visits[this.state.visit].SGLT2} 
                                     onChange={this.handleValueChange}
                                     name='SGLT2'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -837,7 +878,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="GLP1_input" 
                                     label="GLP1"
-                                    value={this.state.result.GLP1} 
+                                    value={this.state.visits[this.state.visit].GLP1} 
                                     onChange={this.handleValueChange}
                                     name='GLP1'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -847,7 +888,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="INSULINA_input" 
                                     label="Insulina"
-                                    value={this.state.result.INSULINA} 
+                                    value={this.state.visits[this.state.visit].INSULINA} 
                                     onChange={this.handleValueChange}
                                     name='INSULINA'
                                     options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
@@ -857,7 +898,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="test_morisky_green_input" 
                                     label="Test Morisky Green"
-                                    value={this.state.result.test_morisky_green} 
+                                    value={this.state.visits[this.state.visit].test_morisky_green} 
                                     onChange={this.handleValueChange}
                                     name='test_morisky_green'
                                     options={[
@@ -878,7 +919,7 @@ export default class Detail extends React.Component {
                             <DatePicker 
                                 id="fecha_ECG_datepicker"
                                 label="Fecha del ECG"
-                                value={this.state.result.fecha_ECG} 
+                                value={this.state.visits[this.state.visit].fecha_ECG} 
                                 onChange={
                                     (isoString) => {
                                         
@@ -894,7 +935,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="sexoInput" 
                                 label="Ritmo"
-                                value={this.state.result.ritmo} 
+                                value={this.state.visits[this.state.visit].ritmo} 
                                 onChange={this.handleValueChange}
                                 name='ritmo'
                                 options={[
@@ -913,7 +954,7 @@ export default class Detail extends React.Component {
                                 placeholder="FC"
                                 onChange={this.handleValueChange}
                                 name='FC'
-                                value={this.state.result.FC}
+                                value={this.state.visits[this.state.visit].FC}
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -924,7 +965,7 @@ export default class Detail extends React.Component {
                                 placeholder="PR (milisegundos)"
                                 onChange={this.handleValueChange}
                                 name='PR'
-                                value={this.state.result.PR}
+                                value={this.state.visits[this.state.visit].PR}
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -935,7 +976,7 @@ export default class Detail extends React.Component {
                                 placeholder="QRS (milisegundos)"
                                 onChange={this.handleValueChange}
                                 name='QRS'
-                                value={this.state.result.QRS}
+                                value={this.state.visits[this.state.visit].QRS}
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -946,7 +987,7 @@ export default class Detail extends React.Component {
                                 placeholder="QTc"
                                 onChange={this.handleValueChange}
                                 name='QTc'
-                                value={this.state.result.QTc}
+                                value={this.state.visits[this.state.visit].QTc}
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -957,7 +998,7 @@ export default class Detail extends React.Component {
                                 placeholder="Eje P"
                                 onChange={this.handleValueChange}
                                 name='EJE_P'
-                                value={this.state.result.EJE_P} 
+                                value={this.state.visits[this.state.visit].EJE_P} 
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -968,7 +1009,7 @@ export default class Detail extends React.Component {
                                 placeholder="Eje QRS"
                                 onChange={this.handleValueChange}
                                 name='EJE_QRS'
-                                value={this.state.result.EJE_QRS} 
+                                value={this.state.visits[this.state.visit].EJE_QRS} 
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -979,7 +1020,7 @@ export default class Detail extends React.Component {
                                 placeholder="Eje T"
                                 onChange={this.handleValueChange}
                                 name='EJE_T'
-                                value={this.state.result.EJE_T} 
+                                value={this.state.visits[this.state.visit].EJE_T} 
                                 />                                  
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -990,14 +1031,14 @@ export default class Detail extends React.Component {
                                 placeholder="P Altura (mm)"
                                 onChange={this.handleValueChange}
                                 name='P_altura'
-                                value={this.state.result.P_altura}
+                                value={this.state.visits[this.state.visit].P_altura}
                                 />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                             <SelectFieldGroup
                                 id="P_melladaInput" 
                                 label="P Mellada"
-                                value={this.state.result.P_mellada} 
+                                value={this.state.visits[this.state.visit].P_mellada} 
                                 onChange={this.handleValueChange}
                                 name='P_mellada'
                                 options={[
@@ -1010,7 +1051,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="P_en_V1_1mmInput" 
                                 label="P en V1 > 1mm"
-                                value={this.state.result.P_en_V1_1mm} 
+                                value={this.state.visits[this.state.visit].P_en_V1_1mm} 
                                 onChange={this.handleValueChange}
                                 name='P_en_V1_1mm'
                                 options={[
@@ -1023,7 +1064,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="Q_patologicaInput" 
                                 label="Q Patológica"
-                                value={this.state.result.Q_patologica} 
+                                value={this.state.visits[this.state.visit].Q_patologica} 
                                 onChange={this.handleValueChange}
                                 name='Q_patologica'
                                 options={[
@@ -1036,7 +1077,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="Q_I_y_aVL_no_patologInput" 
                                 label="Q I y aVL no patológica"
-                                value={this.state.result.Q_I_y_aVL_no_patolog} 
+                                value={this.state.visits[this.state.visit].Q_I_y_aVL_no_patolog} 
                                 onChange={this.handleValueChange}
                                 name='Q_I_y_aVL_no_patolog'
                                 options={[
@@ -1049,7 +1090,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="Q_inferior_no_patologInput" 
                                 label="Q  inferior no patológica"
-                                value={this.state.result.Q_inferior_no_patolog} 
+                                value={this.state.visits[this.state.visit].Q_inferior_no_patolog} 
                                 onChange={this.handleValueChange}
                                 name='Q_inferior_no_patolog'
                                 options={[
@@ -1062,7 +1103,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="Q_V3_4_no_patologInput" 
                                 label="Q V3-4 no patológica"
-                                value={this.state.result.Q_V3_4_no_patolog} 
+                                value={this.state.visits[this.state.visit].Q_V3_4_no_patolog} 
                                 onChange={this.handleValueChange}
                                 name='Q_V3_4_no_patolog'
                                 options={[
@@ -1075,7 +1116,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="Q_V5_6_no_patologInput" 
                                 label="Q V5-6 no patológica"
-                                value={this.state.result.Q_V5_6_no_patolog} 
+                                value={this.state.visits[this.state.visit].Q_V5_6_no_patolog} 
                                 onChange={this.handleValueChange}
                                 name='Q_V5_6_no_patolog'
                                 options={[
@@ -1088,7 +1129,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="muesca_inf_QRSInput" 
                                 label="Muesca Inferior QRS"
-                                value={this.state.result.muesca_inf_QRS} 
+                                value={this.state.visits[this.state.visit].muesca_inf_QRS} 
                                 onChange={this.handleValueChange}
                                 name='muesca_inf_QRS'
                                 options={[
@@ -1101,7 +1142,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="muesca_lat_QRSInput" 
                                 label="Muesca Lateral QRS"
-                                value={this.state.result.muesca_lat_QRS} 
+                                value={this.state.visits[this.state.visit].muesca_lat_QRS} 
                                 onChange={this.handleValueChange}
                                 name='muesca_lat_QRS'
                                 options={[
@@ -1114,7 +1155,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="muesca_ant_QRSInput" 
                                 label="Muesca Anterior QRS"
-                                value={this.state.result.muesca_ant_QRS} 
+                                value={this.state.visits[this.state.visit].muesca_ant_QRS} 
                                 onChange={this.handleValueChange}
                                 name='muesca_ant_QRS'
                                 options={[
@@ -1133,7 +1174,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en I (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_I'
-                                value={this.state.result.R_en_I}
+                                value={this.state.visits[this.state.visit].R_en_I}
                             />
                         </div>   
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1144,7 +1185,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en III (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_III'
-                                value={this.state.result.R_en_III}
+                                value={this.state.visits[this.state.visit].R_en_III}
                             />
                         </div>  
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1155,7 +1196,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en AVF (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_aVF'
-                                value={this.state.result.R_en_aVF}
+                                value={this.state.visits[this.state.visit].R_en_aVF}
                             />
                         </div>   
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1166,7 +1207,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en AVL (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_aVL'
-                                value={this.state.result.R_en_aVL}
+                                value={this.state.visits[this.state.visit].R_en_aVL}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1177,7 +1218,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en V2 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V2'
-                                value={this.state.result.R_en_V2}
+                                value={this.state.visits[this.state.visit].R_en_V2}
                             />
                         </div>      
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1188,7 +1229,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en V5 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V5'
-                                value={this.state.result.R_en_V5}
+                                value={this.state.visits[this.state.visit].R_en_V5}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1199,7 +1240,7 @@ export default class Detail extends React.Component {
                                 placeholder="R en V6 (mm)"
                                 onChange={this.handleValueChange}
                                 name='R_en_V6'
-                                value={this.state.result.R_en_V6}
+                                value={this.state.visits[this.state.visit].R_en_V6}
                             />
                         </div>   
                     </div>
@@ -1212,7 +1253,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en I (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_I'
-                                value={this.state.result.S_en_I}
+                                value={this.state.visits[this.state.visit].S_en_I}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1223,7 +1264,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en II (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_II'
-                                value={this.state.result.S_en_II}
+                                value={this.state.visits[this.state.visit].S_en_II}
                             />
                         </div>  
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1234,7 +1275,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en III (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_III'
-                                value={this.state.result.S_en_III}
+                                value={this.state.visits[this.state.visit].S_en_III}
                             />
                         </div>  
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1245,7 +1286,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en V1 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V1'
-                                value={this.state.result.S_en_V1}
+                                value={this.state.visits[this.state.visit].S_en_V1}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1256,7 +1297,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en V3 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V3'
-                                value={this.state.result.S_en_V3}
+                                value={this.state.visits[this.state.visit].S_en_V3}
                             />
                         </div>  
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1267,7 +1308,7 @@ export default class Detail extends React.Component {
                                 placeholder="S en V6 (mm)"
                                 onChange={this.handleValueChange}
                                 name='S_en_V6'
-                                value={this.state.result.S_en_V6}
+                                value={this.state.visits[this.state.visit].S_en_V6}
                             />
                         </div>  
                     </div>
@@ -1276,7 +1317,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="bloqueos_ramaInput" 
                                 label="Bloqueos Rama"
-                                value={this.state.result.bloqueos_rama} 
+                                value={this.state.visits[this.state.visit].bloqueos_rama} 
                                 onChange={this.handleValueChange}
                                 name='bloqueos_rama'
                                 options={[
@@ -1292,7 +1333,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="hemibloqueosInput" 
                                 label="Hemibloqueos"
-                                value={this.state.result.hemibloqueos} 
+                                value={this.state.visits[this.state.visit].hemibloqueos} 
                                 onChange={this.handleValueChange}
                                 name='hemibloqueos'
                                 options={[
@@ -1312,7 +1353,7 @@ export default class Detail extends React.Component {
                                 placeholder="Indice de Sokolow-Lyon"
                                 onChange={this.handleValueChange}
                                 name='Sokolow'
-                                value={this.state.result.Sokolow}
+                                value={this.state.visits[this.state.visit].Sokolow}
                             />
                         </div> 
                         
@@ -1324,7 +1365,7 @@ export default class Detail extends React.Component {
                                 placeholder="Indice de Cornell"
                                 onChange={this.handleValueChange}
                                 name='Cornell'
-                                value={this.state.result.Cornell}
+                                value={this.state.visits[this.state.visit].Cornell}
                             />
                         </div> 
                     </div>
@@ -1333,7 +1374,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="STInput" 
                                 label="ST"
-                                value={this.state.result.ST} 
+                                value={this.state.visits[this.state.visit].ST} 
                                 onChange={this.handleValueChange}
                                 name='ST'
                                 options={[
@@ -1348,7 +1389,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="ST_alteradoInput" 
                                 label="ST Alterado"
-                                value={this.state.result.ST_alterado} 
+                                value={this.state.visits[this.state.visit].ST_alterado} 
                                 onChange={this.handleValueChange}
                                 name='ST_alterado'
                                 options={[
@@ -1364,7 +1405,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="extrasistoles_Input" 
                                 label="Extrasístoles"
-                                value={this.state.result.extrasistoles} 
+                                value={this.state.visits[this.state.visit].extrasistoles} 
                                 onChange={this.handleValueChange}
                                 name='extrasistoles'
                                 options={[
@@ -1383,7 +1424,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="t_cara_inferior_Input" 
                                 label="T Cara Inferior (II, III y AVF)"
-                                value={this.state.result.t_cara_inferior} 
+                                value={this.state.visits[this.state.visit].t_cara_inferior} 
                                 onChange={this.handleValueChange}
                                 name='t_cara_inferior'
                                 options={[
@@ -1399,7 +1440,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="t_cara_lateral_Input" 
                                 label="T Cara Lateral (I y AVL)"
-                                value={this.state.result.t_cara_lateral} 
+                                value={this.state.visits[this.state.visit].t_cara_lateral} 
                                 onChange={this.handleValueChange}
                                 name='t_cara_lateral'
                                 options={[
@@ -1415,7 +1456,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="t_cara_septal_Input" 
                                 label="T Cara Septal (V1, V2)"
-                                value={this.state.result.t_cara_septal} 
+                                value={this.state.visits[this.state.visit].t_cara_septal} 
                                 onChange={this.handleValueChange}
                                 name='t_cara_septal'
                                 options={[
@@ -1431,7 +1472,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="t_cara_anterior_Input" 
                                 label="T Cara Anterior (V3, V4)"
-                                value={this.state.result.t_cara_anterior} 
+                                value={this.state.visits[this.state.visit].t_cara_anterior} 
                                 onChange={this.handleValueChange}
                                 name='t_cara_anterior'
                                 options={[
@@ -1448,7 +1489,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="t_cara_lateral_alta_Input" 
                                 label="T Cara Lateral Alta (V5, V6)"
-                                value={this.state.result.t_cara_lateral_alta} 
+                                value={this.state.visits[this.state.visit].t_cara_lateral_alta} 
                                 onChange={this.handleValueChange}
                                 name='t_cara_lateral_alta'
                                 options={[
@@ -1471,7 +1512,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="fumadorInput" 
                                     label="Fumador"
-                                    value={this.state.result.fumador} 
+                                    value={this.state.visits[this.state.visit].fumador} 
                                     onChange={this.handleValueChange}
                                     name='fumador'
                                     options={[
@@ -1488,14 +1529,14 @@ export default class Detail extends React.Component {
                                     placeholder="Cigarrillos"
                                     onChange={this.handleValueChange}
                                     name='cigarrillos'
-                                    value={this.state.result.cigarrillos}
+                                    value={this.state.visits[this.state.visit].cigarrillos}
                                 />
                             </div> 
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <SelectFieldGroup
                                     id="alcoholInput" 
                                     label="Alcohol"
-                                    value={this.state.result.alcohol} 
+                                    value={this.state.visits[this.state.visit].alcohol} 
                                     onChange={this.handleValueChange}
                                     name='alcohol'
                                     options={[
@@ -1509,7 +1550,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="sal_Input" 
                                     label="Sal"
-                                    value={this.state.result.sal} 
+                                    value={this.state.visits[this.state.visit].sal} 
                                     onChange={this.handleValueChange}
                                     name='sal'
                                     options={[
@@ -1523,7 +1564,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="dieta_mediterranea_Input" 
                                     label="Dieta Mediterránea"
-                                    value={this.state.result.dieta_mediterranea} 
+                                    value={this.state.visits[this.state.visit].dieta_mediterranea} 
                                     onChange={this.handleValueChange}
                                     name='dieta_mediterranea'
                                     options={[
@@ -1536,7 +1577,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ejercicio_fisico_Input" 
                                     label="Ejercicio físico"
-                                    value={this.state.result.ejercicio_fisico} 
+                                    value={this.state.visits[this.state.visit].ejercicio_fisico} 
                                     onChange={this.handleValueChange}
                                     name='ejercicio_fisico'
                                     options={[
@@ -1552,7 +1593,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="HTA_Input" 
                                     label="HTA"
-                                    value={this.state.result.HTA} 
+                                    value={this.state.visits[this.state.visit].HTA} 
                                     onChange={this.handleValueChange}
                                     name='HTA'
                                     options={[
@@ -1569,7 +1610,7 @@ export default class Detail extends React.Component {
                                     placeholder="Años HTA"
                                     onChange={this.handleValueChange}
                                     name='años_HTA'
-                                    value={this.state.result.años_HTA}
+                                    value={this.state.visits[this.state.visit].años_HTA}
                                     help="Años desde que se diagnosticó la HTA"
                                 />  
                             </div>
@@ -1577,7 +1618,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="HTA_secundaria_input" 
                                     label="HTA Secundaria"
-                                    value={this.state.result.HTA_secundaria} 
+                                    value={this.state.visits[this.state.visit].HTA_secundaria} 
                                     onChange={this.handleValueChange}
                                     name='HTA_secundaria'
                                     options={[
@@ -1590,7 +1631,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="causa_HTA_secund_input" 
                                     label="Causa HTA Secundaria"
-                                    value={this.state.result.causa_HTA_secund} 
+                                    value={this.state.visits[this.state.visit].causa_HTA_secund} 
                                     onChange={this.handleValueChange}
                                     name='causa_HTA_secund'
                                     options={[
@@ -1608,7 +1649,7 @@ export default class Detail extends React.Component {
                                     id="Dgtco_HTA_input" 
                                     label="Diagnótico HTA"
                                     help="¿Cómo se realizó el diagnóstico?"
-                                    value={this.state.result.Dgtco_HTA} 
+                                    value={this.state.visits[this.state.visit].Dgtco_HTA} 
                                     onChange={this.handleValueChange}
                                     name='Dgtco_HTA'
                                     options={[
@@ -1625,7 +1666,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="AF_MS_input" 
                                     label="AF MS"
-                                    value={this.state.result.AF_MS} 
+                                    value={this.state.visits[this.state.visit].AF_MS} 
                                     onChange={this.handleValueChange}
                                     name='AF_MS'
                                     options={[
@@ -1640,7 +1681,7 @@ export default class Detail extends React.Component {
                                     id="AF_C_Isq_precoz_input" 
                                     label="AF C Isq. precoz"
                                     help="C Isq. Hombres < 55, mujer < 50"
-                                    value={this.state.result.AF_C_Isq_precoz} 
+                                    value={this.state.visits[this.state.visit].AF_C_Isq_precoz} 
                                     onChange={this.handleValueChange}
                                     name='AF_C_Isq_precoz'
                                     options={[
@@ -1655,7 +1696,7 @@ export default class Detail extends React.Component {
                                     id="HTA_controlada_input" 
                                     label="HTA Controlada"
                                     help="¿Está bien controlada ahora?"
-                                    value={this.state.result.HTA_controlada} 
+                                    value={this.state.visits[this.state.visit].HTA_controlada} 
                                     onChange={this.handleValueChange}
                                     name='HTA_controlada'
                                     options={[
@@ -1670,7 +1711,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="DM_input" 
                                     label="DM"
-                                    value={this.state.result.DM} 
+                                    value={this.state.visits[this.state.visit].DM} 
                                     onChange={this.handleValueChange}
                                     name='DM'
                                     options={[
@@ -1684,7 +1725,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico DM"
-                                    value={this.state.result.fecha_dgtco_DM} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_DM} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1698,7 +1739,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="DLP_input" 
                                     label="DLP"
-                                    value={this.state.result.DLP} 
+                                    value={this.state.visits[this.state.visit].DLP} 
                                     onChange={this.handleValueChange}
                                     name='DLP'
                                     options={[
@@ -1714,7 +1755,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="IC_input" 
                                     label="Insuficiencia Cardiaca (IC)"
-                                    value={this.state.result.IC} 
+                                    value={this.state.visits[this.state.visit].IC} 
                                     onChange={this.handleValueChange}
                                     name='IC'
                                     options={[
@@ -1727,7 +1768,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico IC"
-                                    value={this.state.result.fecha_dgtco_IC} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_IC} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1743,7 +1784,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="FA_input" 
                                     label="FA"
-                                    value={this.state.result.FA} 
+                                    value={this.state.visits[this.state.visit].FA} 
                                     onChange={this.handleValueChange}
                                     name='FA'
                                     options={[
@@ -1758,7 +1799,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico FA"
-                                    value={this.state.result.fecha_dgtco_FA} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_FA} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1774,7 +1815,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="ictus_input" 
                                     label="Ictus"
-                                    value={this.state.result.ictus} 
+                                    value={this.state.visits[this.state.visit].ictus} 
                                     onChange={this.handleValueChange}
                                     name='ictus'
                                     options={[
@@ -1790,7 +1831,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico Ictus"
-                                    value={this.state.result.fecha_dgtco_ictus} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_ictus} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1806,7 +1847,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="carotidas_input" 
                                     label="Carótidas"
-                                    value={this.state.result.carotidas} 
+                                    value={this.state.visits[this.state.visit].carotidas} 
                                     onChange={this.handleValueChange}
                                     name='carotidas'
                                     options={[
@@ -1822,7 +1863,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico carótidas"
-                                    value={this.state.result.fecha_dgtco_carotidas} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_carotidas} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1838,7 +1879,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="claudicacion_intermitente_input" 
                                     label="Claudicación intermitente (CInt)"
-                                    value={this.state.result.claudicacion_intermitente} 
+                                    value={this.state.visits[this.state.visit].claudicacion_intermitente} 
                                     onChange={this.handleValueChange}
                                     name='claudicacion_intermitente'
                                     options={[
@@ -1851,7 +1892,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico CInt"
-                                    value={this.state.result.fecha_dgtco_claudicacion} 
+                                    value={this.state.visits[this.state.visit].fecha_dgtco_claudicacion} 
                                     onChange={
                                         (isoString) => {
                                             
@@ -1867,7 +1908,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="cardiop_isquemica_input" 
                                     label="Cardiopatía Isquemica (CI)"
-                                    value={this.state.result.cardiop_isquemica} 
+                                    value={this.state.visits[this.state.visit].cardiop_isquemica} 
                                     onChange={this.handleValueChange}
                                     name='cardiop_isquemica'
                                     options={[
@@ -1880,7 +1921,7 @@ export default class Detail extends React.Component {
                             <div className="col-xs-12 col-sm-6 col-lg-3">
                                 <DatePicker 
                                     label="Fecha de diagnóstico CI"
-                                    value={this.state.result.fecha_cardiop_isquemica} 
+                                    value={this.state.visits[this.state.visit].fecha_cardiop_isquemica} 
                                     onChange={
                                         (isoString) => {
                                             var stateResult = this.state.result;
@@ -1895,7 +1936,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="disfuncionSexualInput" 
                                     label="Disfunción Sexual"
-                                    value={this.state.result.disfuncionSexual} 
+                                    value={this.state.visits[this.state.visit].disfuncionSexual} 
                                     onChange={this.handleValueChange}
                                     name='disfuncionSexual'
                                     options={[
@@ -1908,7 +1949,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="soasInput" 
                                     label="SAOS"
-                                    value={this.state.result.SAOS} 
+                                    value={this.state.visits[this.state.visit].SAOS} 
                                     onChange={this.handleValueChange}
                                     name='SAOS'
                                     options={[
@@ -1924,7 +1965,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="epocInput" 
                                     label="EPOC"
-                                    value={this.state.result.EPOC} 
+                                    value={this.state.visits[this.state.visit].EPOC} 
                                     onChange={this.handleValueChange}
                                     name='EPOC'
                                     options={[
@@ -1937,7 +1978,7 @@ export default class Detail extends React.Component {
                                 <SelectFieldGroup
                                     id="gradodEPOCInput" 
                                     label="Grado EPOC"
-                                    value={this.state.result.gradodEPOC} 
+                                    value={this.state.visits[this.state.visit].gradodEPOC} 
                                     onChange={this.handleValueChange}
                                     name='gradodEPOC'
                                     options={[
@@ -1960,7 +2001,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="analitica_basal_input" 
                                 label="Analítica basal"
-                                value={this.state.result.analitica_basal} 
+                                value={this.state.visits[this.state.visit].analitica_basal} 
                                 onChange={this.handleValueChange}
                                 name='analitica_basal'
                                 options={[
@@ -1972,7 +2013,7 @@ export default class Detail extends React.Component {
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <DatePicker 
                                 label="Fecha analítica"
-                                value={this.state.result.fecha_analitica} 
+                                value={this.state.visits[this.state.visit].fecha_analitica} 
                                 onChange={
                                     (isoString) => {
                                         var stateResult = this.state.result;
@@ -1991,7 +2032,7 @@ export default class Detail extends React.Component {
                                 placeholder="Hb"
                                 onChange={this.handleValueChange}
                                 name='hb'
-                                value={this.state.result.hb}
+                                value={this.state.visits[this.state.visit].hb}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2002,7 +2043,7 @@ export default class Detail extends React.Component {
                                 placeholder="Hcto"
                                 onChange={this.handleValueChange}
                                 name='hcto'
-                                value={this.state.result.hcto}
+                                value={this.state.visits[this.state.visit].hcto}
                             />
                         </div> 
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2013,7 +2054,7 @@ export default class Detail extends React.Component {
                                 placeholder="VCM"
                                 onChange={this.handleValueChange}
                                 name='VCM'
-                                value={this.state.result.VCM}
+                                value={this.state.visits[this.state.visit].VCM}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2024,7 +2065,7 @@ export default class Detail extends React.Component {
                                 placeholder="CHCM"
                                 onChange={this.handleValueChange}
                                 name='CHCM'
-                                value={this.state.result.CHCM}
+                                value={this.state.visits[this.state.visit].CHCM}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2035,7 +2076,7 @@ export default class Detail extends React.Component {
                                 placeholder="Plaquetas"
                                 onChange={this.handleValueChange}
                                 name='plaquetas'
-                                value={this.state.result.plaquetas}
+                                value={this.state.visits[this.state.visit].plaquetas}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2046,7 +2087,7 @@ export default class Detail extends React.Component {
                                 placeholder="Glucosa"
                                 onChange={this.handleValueChange}
                                 name='glucosa'
-                                value={this.state.result.glucosa}
+                                value={this.state.visits[this.state.visit].glucosa}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2057,7 +2098,7 @@ export default class Detail extends React.Component {
                                 placeholder="hb1Ac"
                                 onChange={this.handleValueChange}
                                 name='hb1Ac'
-                                value={this.state.result.hb1Ac}
+                                value={this.state.visits[this.state.visit].hb1Ac}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2068,7 +2109,7 @@ export default class Detail extends React.Component {
                                 placeholder="Urea"
                                 onChange={this.handleValueChange}
                                 name='urea'
-                                value={this.state.result.urea}
+                                value={this.state.visits[this.state.visit].urea}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2079,7 +2120,7 @@ export default class Detail extends React.Component {
                                 placeholder="Creatinina"
                                 onChange={this.handleValueChange}
                                 name='creatinina'
-                                value={this.state.result.creatinina}
+                                value={this.state.visits[this.state.visit].creatinina}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2090,7 +2131,7 @@ export default class Detail extends React.Component {
                                 placeholder="FG"
                                 onChange={this.handleValueChange}
                                 name='FG'
-                                value={this.state.result.FG}
+                                value={this.state.visits[this.state.visit].FG}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2101,7 +2142,7 @@ export default class Detail extends React.Component {
                                 placeholder="Na"
                                 onChange={this.handleValueChange}
                                 name='Na'
-                                value={this.state.result.Na}
+                                value={this.state.visits[this.state.visit].Na}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2112,7 +2153,7 @@ export default class Detail extends React.Component {
                                 placeholder="K"
                                 onChange={this.handleValueChange}
                                 name='K'
-                                value={this.state.result.K}
+                                value={this.state.visits[this.state.visit].K}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2123,7 +2164,7 @@ export default class Detail extends React.Component {
                                 placeholder="GOT"
                                 onChange={this.handleValueChange}
                                 name='GOT'
-                                value={this.state.result.GOT}
+                                value={this.state.visits[this.state.visit].GOT}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2134,7 +2175,7 @@ export default class Detail extends React.Component {
                                 placeholder="GPT"
                                 onChange={this.handleValueChange}
                                 name='GPT'
-                                value={this.state.result.GPT}
+                                value={this.state.visits[this.state.visit].GPT}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2145,7 +2186,7 @@ export default class Detail extends React.Component {
                                 placeholder="GGT"
                                 onChange={this.handleValueChange}
                                 name='GGT'
-                                value={this.state.result.GGT}
+                                value={this.state.visits[this.state.visit].GGT}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2156,7 +2197,7 @@ export default class Detail extends React.Component {
                                 placeholder="CT"
                                 onChange={this.handleValueChange}
                                 name='CT'
-                                value={this.state.result.CT}
+                                value={this.state.visits[this.state.visit].CT}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2167,7 +2208,7 @@ export default class Detail extends React.Component {
                                 placeholder="LDL"
                                 onChange={this.handleValueChange}
                                 name='LDL'
-                                value={this.state.result.LDL}
+                                value={this.state.visits[this.state.visit].LDL}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2178,7 +2219,7 @@ export default class Detail extends React.Component {
                                 placeholder="HDL"
                                 onChange={this.handleValueChange}
                                 name='HDL'
-                                value={this.state.result.HDL}
+                                value={this.state.visits[this.state.visit].HDL}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2189,7 +2230,7 @@ export default class Detail extends React.Component {
                                 placeholder="TG"
                                 onChange={this.handleValueChange}
                                 name='TG'
-                                value={this.state.result.TG}
+                                value={this.state.visits[this.state.visit].TG}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2200,7 +2241,7 @@ export default class Detail extends React.Component {
                                 placeholder="Microalbuminuria"
                                 onChange={this.handleValueChange}
                                 name='microalbuminuria'
-                                value={this.state.result.microalbuminuria}
+                                value={this.state.visits[this.state.visit].microalbuminuria}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2211,7 +2252,7 @@ export default class Detail extends React.Component {
                                 placeholder="Cociente Alb/cr"
                                 onChange={this.handleValueChange}
                                 name='cociente_alb_cr'
-                                value={this.state.result.cociente_alb_cr}
+                                value={this.state.visits[this.state.visit].cociente_alb_cr}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2222,7 +2263,7 @@ export default class Detail extends React.Component {
                                 placeholder="Proteinuria"
                                 onChange={this.handleValueChange}
                                 name='proteinuria'
-                                value={this.state.result.proteinuria}
+                                value={this.state.visits[this.state.visit].proteinuria}
                             />
                         </div>
                     </div>
@@ -2237,7 +2278,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="MAPA_reciente_input" 
                                 label="Mapa Reciente?"
-                                value={this.state.result.mapa_reciente} 
+                                value={this.state.visits[this.state.visit].mapa_reciente} 
                                 onChange={this.handleValueChange}
                                 name='mapa_reciente'
                                 options={[
@@ -2254,7 +2295,7 @@ export default class Detail extends React.Component {
                                 placeholder="Mapa Diurna"
                                 onChange={this.handleValueChange}
                                 name='mapa_diurna'
-                                value={this.state.result.mapa_diurna}
+                                value={this.state.visits[this.state.visit].mapa_diurna}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2265,7 +2306,7 @@ export default class Detail extends React.Component {
                                 placeholder="Mapa Nocturno"
                                 onChange={this.handleValueChange}
                                 name='mapa_nocturno'
-                                value={this.state.result.mapa_nocturno}
+                                value={this.state.visits[this.state.visit].mapa_nocturno}
                             />
                         </div>
 
@@ -2277,7 +2318,7 @@ export default class Detail extends React.Component {
                                 placeholder="Dip"
                                 onChange={this.handleValueChange}
                                 name='dip'
-                                value={this.state.result.dip}
+                                value={this.state.visits[this.state.visit].dip}
                             />
                         </div>
                     </div>
@@ -2286,7 +2327,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="ecocardio_input" 
                                 label="Ecocardio"
-                                value={this.state.result.ecocardio} 
+                                value={this.state.visits[this.state.visit].ecocardio} 
                                 onChange={this.handleValueChange}
                                 name='ecocardio'
                                 options={[
@@ -2298,7 +2339,7 @@ export default class Detail extends React.Component {
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <DatePicker 
                                 label="Fecha Ecocardio"
-                                value={this.state.result.fecha_ecocardio} 
+                                value={this.state.visits[this.state.visit].fecha_ecocardio} 
                                 onChange={
                                     (isoString) => {
                                         var stateResult = this.state.result;
@@ -2317,7 +2358,7 @@ export default class Detail extends React.Component {
                                 placeholder="DTDVI"
                                 onChange={this.handleValueChange}
                                 name='DTDVI'
-                                value={this.state.result.DTDVI}
+                                value={this.state.visits[this.state.visit].DTDVI}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2329,7 +2370,7 @@ export default class Detail extends React.Component {
                                 help="Grosor del septo"
                                 onChange={this.handleValueChange}
                                 name='septo'
-                                value={this.state.result.septo}
+                                value={this.state.visits[this.state.visit].septo}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2340,7 +2381,7 @@ export default class Detail extends React.Component {
                                 placeholder="Masa"
                                 onChange={this.handleValueChange}
                                 name='masa'
-                                value={this.state.result.masa}
+                                value={this.state.visits[this.state.visit].masa}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2351,7 +2392,7 @@ export default class Detail extends React.Component {
                                 placeholder="AI"
                                 onChange={this.handleValueChange}
                                 name='AI'
-                                value={this.state.result.AI}
+                                value={this.state.visits[this.state.visit].AI}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
@@ -2362,14 +2403,14 @@ export default class Detail extends React.Component {
                                 placeholder="FEVI"
                                 onChange={this.handleValueChange}
                                 name='FEVI'
-                                value={this.state.result.FEVI}
+                                value={this.state.visits[this.state.visit].FEVI}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <SelectFieldGroup
                                 id="diastole_input" 
                                 label="Diástole"
-                                value={this.state.result.diastole} 
+                                value={this.state.visits[this.state.visit].diastole} 
                                 onChange={this.handleValueChange}
                                 name='diastole'
                                 options={[
@@ -2385,7 +2426,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="valvulopatia_input" 
                                 label="Valvulopatía"
-                                value={this.state.result.valvulopatia} 
+                                value={this.state.visits[this.state.visit].valvulopatia} 
                                 onChange={this.handleValueChange}
                                 name='valvulopatia'
                                 options={[
@@ -2414,7 +2455,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="fondo_ojo_input" 
                                 label="Fondo ojo"
-                                value={this.state.result.fondo_ojo} 
+                                value={this.state.visits[this.state.visit].fondo_ojo} 
                                 onChange={this.handleValueChange}
                                 name='fondo_ojo'
                                 options={[
@@ -2426,7 +2467,7 @@ export default class Detail extends React.Component {
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <DatePicker 
                                 label="Fecha Fondo Ojo"
-                                value={this.state.result.fecha_fondo_ojo} 
+                                value={this.state.visits[this.state.visit].fecha_fondo_ojo} 
                                 onChange={
                                     (isoString) => {
                                         var stateResult = this.state.result;
@@ -2439,7 +2480,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="fondo_ojo_patol_input" 
                                 label="Fondo ojo patológico"
-                                value={this.state.result.fondo_ojo_patologico} 
+                                value={this.state.visits[this.state.visit].fondo_ojo_patologico} 
                                 onChange={this.handleValueChange}
                                 name='fondo_ojo_patologico'
                                 options={[
@@ -2456,7 +2497,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="renal_estudio_input" 
                                 label="Estudio Renal"
-                                value={this.state.result.renal_estudio} 
+                                value={this.state.visits[this.state.visit].renal_estudio} 
                                 onChange={this.handleValueChange}
                                 name='renal_estudio'
                                 options={[
@@ -2469,7 +2510,7 @@ export default class Detail extends React.Component {
                             <SelectFieldGroup
                                 id="patologia_renal_input" 
                                 label="Patología Renal"
-                                value={this.state.result.patologia_renal} 
+                                value={this.state.visits[this.state.visit].patologia_renal} 
                                 onChange={this.handleValueChange}
                                 name='patologia_renal'
                                 options={[
@@ -2486,14 +2527,14 @@ export default class Detail extends React.Component {
                                 placeholder="Qué patología renal?"
                                 onChange={this.handleValueChange}
                                 name='cual_patologia_renal'
-                                value={this.state.result.cual_patologia_renal}
+                                value={this.state.visits[this.state.visit].cual_patologia_renal}
                             />
                         </div>
                         <div className="col-xs-12 col-sm-6 col-lg-3">
                             <SelectFieldGroup
                                 id="proteinuria_input" 
                                 label="Proteinuria"
-                                value={this.state.result.proteinuria} 
+                                value={this.state.visits[this.state.visit].proteinuria} 
                                 onChange={this.handleValueChange}
                                 name='proteinuria'
                                 options={[
