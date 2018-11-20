@@ -1,6 +1,6 @@
 import React from 'react';
 import './Detail.css';
-import {Button, Nav, NavItem, Glyphicon} from 'react-bootstrap';
+import {Button, Nav, NavItem, Glyphicon, ControlLabel} from 'react-bootstrap';
 //import Result from '../../Model/result';
 
 import Customer from '../../Model/Customer';
@@ -22,6 +22,8 @@ export default class Detail extends React.Component {
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.resetState = this.resetState.bind(this);
         this.showMessage = this.showMessage.bind(this);
+        this.newSession = this.newSession.bind(this);
+        this.handleSessionValueChange = this.handleSessionValueChange.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -70,14 +72,15 @@ export default class Detail extends React.Component {
                             result: customer, 
                             visits: visitCollection,
                             visit: visitCollection.length - 1,
-                            message: {txt: "", type: "info", showClose: false}});
-                    })
-                console.log(that.state.visits);
+                            message: {txt: "", type: "info", showClose: false}
+                        });
+
+                    });
             }).catch(function(error) {
                 console.log(error);
                 that.setState({
                     result: new Customer(), 
-                    visits: [new Session()], 
+                    visits: [], 
                     visit: 0,
                     message: {txt: "El documento que está intentando cargar no existe.", type: "error", showClose: true, exists: false}
                 });
@@ -86,6 +89,8 @@ export default class Detail extends React.Component {
             this.setState({result: new Customer(), visits: [new Session()], visit: 0});
         }
     }
+
+    
 
     save() {
         this.showMessage("Guardando...", "info", false);
@@ -136,6 +141,11 @@ export default class Detail extends React.Component {
         this.setState({visits: newState});
     }
 
+    handleSessionValueChange(event) {
+        console.log("nueva session: " + event.target.value)
+        this.setState({visit: event.target.value});
+    }
+
     handleCloseModal() {
         this.setState({message: {txt: "", type: "info", showClose: false}});
     }
@@ -155,7 +165,15 @@ export default class Detail extends React.Component {
             visit: 0,
             visits: [new Session()]
         });
-        
+    }
+
+    newSession() {
+        let newSession = new Session();
+        newSession.creatorUser = this.props.fb.auth().currentUser.email;
+        let sessions = this.state.visits;
+        sessions.push(newSession);
+        console.log(sessions.length);
+        this.setState({visits: sessions, visit: sessions.length-1});
     }
 
     showMessage(txt, type, showClose){
@@ -170,7 +188,7 @@ export default class Detail extends React.Component {
         map(this.state.visits, (value, key) => {
             index = (key + 1);
             let momentDate = moment(new Date(value.fecha_visita));
-            visitsOptions.push({value: key, label: index + "ª visita (" + momentDate.format("DD-MM-YYYY") + ")"},)
+            visitsOptions.push({value: key, label: index + "ª visita (" + momentDate.format("DD-MM-YYYY") + " - " + value.creatorUser + ")"},)
         });
 
         /*
@@ -289,17 +307,23 @@ export default class Detail extends React.Component {
                             />
                     </div>
                 </div>
+                <div className="pageTitle">
+                    <h3 className={'teal-text'}>Visitas</h3>
+                </div>
                 <div className="row">
-                    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                    <div className="col-xs-12 col-sm-8">
                         <SelectFieldGroup
                             id="visitaInput" 
                             label="Visita"
-                            value={this.state.result.visita} 
-                            onChange={this.handleValueChange}
+                            value={this.state.visit} 
+                            onChange={this.handleSessionValueChange}
                             name='visita'
                             options={visitsOptions}
-                        
                             />
+                    </div>
+                    <div className="col-xs-12 col-sm-4">
+                        <ControlLabel>&nbsp;</ControlLabel>
+                        <Button bsStyle="primary" block={true} onClick={this.newSession}><Glyphicon glyph="plus"/> Nueva visita</Button>
                     </div>
                 </div>
                 <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>

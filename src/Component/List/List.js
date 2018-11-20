@@ -33,7 +33,7 @@ export default class List extends React.Component {
     }
 
     load(){
-        this.props.fb.firestore().collection("results")
+        this.props.fb.firestore().collection("customers")
                 .orderBy("id", "desc").get()
                 .then(querySnapshot => {
             var collection = [];
@@ -48,7 +48,7 @@ export default class List extends React.Component {
         
         var that = this;
         this.showMessage("Borrando paciente...", "info", false);
-        this.props.fb.firestore().collection("results").doc(id).delete().then(function() {
+        this.props.fb.firestore().collection("customers").doc(id).delete().then(function() {
             that.showMessage("Se ha borrado el usuario", "success", true, () => that.refresh());
         }).catch(function(error) {
             that.showMessage("Se produjo un error, inténtalo de nuevo.", "danger", true, () => that.refresh());

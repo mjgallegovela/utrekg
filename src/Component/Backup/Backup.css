@@ -1,0 +1,25 @@
+.row.btns {
+    margin-bottom: 20px
+}
+
+.tab-content {
+    margin-left: 0 !important;
+    border-left: 1px solid #222;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+.nav.nav-tabs {
+    border-color: #222;
+}
+
+.nav.nav-tabs > li > a {
+    border: 1px solid #222;
+    color: #222;
+    background-color: #ddd;
+}
+
+.nav.nav-tabs > li.active > a {
+    background-color: white;
+    border-bottom-color: transparent;   
+}
+

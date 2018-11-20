@@ -25,6 +25,9 @@ class Navigation extends Component {
                         <LinkContainer to='/private/newUser'>
                             <NavItem><i className="far fa-user"></i> Nuevo paciente</NavItem>
                         </LinkContainer>
+                        <LinkContainer to='/private/backup'>
+                            <NavItem><i className="fas fa-database"></i> Copias de seguridad</NavItem>
+                        </LinkContainer>
                     </Nav>
                     <Nav pullRight>
                         <NavItem>

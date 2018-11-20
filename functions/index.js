@@ -5,6 +5,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 var db = admin.firestore();
+var bucket = admin.storage().bucket("utrekg-2018.appspot.com");
 
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
@@ -16,6 +17,37 @@ exports.addMessage = functions.https.onRequest((req, res) => {
     // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
     return res.redirect(303, snapshot.ref.toString());
   });
+});
+
+exports.createCompleteBackup = functions.https.onRequest((req, res) => {
+
+
+//functions.https.onRequest((req, res) => {
+  let now = new Date();
+  /*
+  db.collection('results').get().then(querySnapshot => {
+    let list = [];
+    querySnapshot.forEach(doc => { 
+      list.push(doc);
+    });
+
+    const file = myBucket.file('backups/' + now.getFullYear() + now.getMonth() + now.getDay() + "/all.json");
+    const contents = JSON.stringify(list);
+
+    //-
+    // If the callback is omitted, we'll return a Promise.
+    //-
+    file.save(contents).then(function() {
+      return { result: 0 };
+    }).catch(ex => {
+      console.log("Error saving file:", ex);
+    });
+    return { result: 0 };
+  }).catch(ex => {
+    console.log("Error getting documents:", ex);
+  });
+  */
+  res.send("Hello");
 });
 
 // Listens for new messages added to /messages/:pushId/original and creates an
@@ -46,6 +78,7 @@ exports.resultsBackup = functions.firestore
 function backupResults (snap, context, eventName) {
   var date = new Date();
   var n_records = 0;
+  /*
   db.collection('results').get().then(querySnapshot => {
     querySnapshot.forEach(doc => { n_records++; });
     db.collection('backup').add({
@@ -57,5 +90,6 @@ function backupResults (snap, context, eventName) {
   }).catch((error) => {
     console.log("Error getting document:", error);
   })
+  */
   return 0;
 }

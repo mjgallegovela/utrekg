@@ -2,9 +2,8 @@ class Session {
     constructor(){
         this.id = null;
         this.customer = null;
-        this.fecha_visita = null;
+        this.fecha_visita = new Date();
         this.creatorUser = "";
-        this.n_visita = 1;
 
         // Pestañas
 
