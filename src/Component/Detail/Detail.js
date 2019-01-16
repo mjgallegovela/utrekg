@@ -228,13 +228,24 @@ export default class Detail extends React.Component {
     }
 
     uploadEkg() {
-        console.log(this.fileEkg.files[0]);
+        this.showMessage("Subiendo archivo...", "info", false);
+        var that = this;
+        let file = this.fileEkg.files[0];
 
         let storage = this.props.fb.storage();
         // Create a storage reference from our storage service
         let storageRef = storage.ref();
         // Child references can also take paths delimited by '/'
-        //let backupRef = storageRef.child('ekgs/' + backupMoment.format("YYYYMMDD") + '_customers.json');
+        let ekgImgRef = storageRef.child('ekgs/' + this.state.visits[this.state.visit].id + '.jpg');
+
+        const task = ekgImgRef.put(file).then(snapshot => {
+            ekgImgRef.getDownloadURL().then( url =>  {
+                that.state.visits[that.state.visit].ekg_img = url;
+                that.showMessage("", "info", false);
+            });
+        }).catch(error => {
+            that.showMessage("Ocurrio un error al subir el archivo.  Por favor, inténtelo de nuevo.", "danger", true);
+        });
     }
 
     render() {
@@ -984,13 +995,21 @@ export default class Detail extends React.Component {
                             {(this.state.visits[this.state.visit].ekg_img === undefined || this.state.visits[this.state.visit].ekg_img === "") && (
                                 <div className='row'>
                                     <div className="col-xs-12 col-xs-offset-0 col-sm-4 col-sm-offset-8 col-md-3 col-md-offset-9">
-                                        <Button bsStyle="success" block={true} onClick={this.openFile}><Glyphicon glyph="plus"/> Nueva visita</Button>
+                                        <Button bsStyle="info" block={true} onClick={this.openFile}><Glyphicon glyph="plus"/> Adjuntar EKG</Button>
                                         <input
                                             ref={input => this.fileEkg = input}
                                             type="file"
+                                            accept=".jpg"
                                             className="hidden"
                                             onChange={this.uploadEkg}
                                             />
+                                    </div>
+                                </div>
+                            )}
+                            {(this.state.visits[this.state.visit].ekg_img !== undefined && this.state.visits[this.state.visit].ekg_img !== "") && (
+                                <div className='row'>
+                                    <div className="col-xs-12">
+                                        <img src={this.state.visits[this.state.visit].ekg_img} className="ekg"></img>
                                     </div>
                                 </div>
                             )}
