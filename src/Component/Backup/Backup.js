@@ -86,8 +86,6 @@ export default class Backup extends React.Component {
                         });
                         json_object['sessions'] = sessionsCollection;
 
-                        console.log(json_object);
-
                         let storage = this.props.fb.storage();
                         // Create a storage reference from our storage service
                         let storageRef = storage.ref();

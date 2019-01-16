@@ -9,6 +9,8 @@ var bucket = admin.storage().bucket("utrekg-2018.appspot.com");
 
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
+/*
+
 exports.addMessage = functions.https.onRequest((req, res) => {
   // Grab the text parameter.
   const original = req.query.text;
@@ -19,8 +21,9 @@ exports.addMessage = functions.https.onRequest((req, res) => {
   });
 });
 
-exports.createCompleteBackup = functions.https.onRequest((req, res) => {
+*/
 
+exports.createCompleteBackup = functions.https.onRequest((req, res) => {
 
 //functions.https.onRequest((req, res) => {
   let now = new Date();
@@ -50,21 +53,6 @@ exports.createCompleteBackup = functions.https.onRequest((req, res) => {
   res.send("Hello");
 });
 
-// Listens for new messages added to /messages/:pushId/original and creates an
-// uppercase version of the message to /messages/:pushId/uppercase
-exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
-    .onCreate((snapshot, context) => {
-      // Grab the current value of what was written to the Realtime Database.
-      const original = snapshot.val();
-      console.log('Uppercasing', context.params.pushId, original);
-      const uppercase = original.toUpperCase();
-      // You must return a Promise when performing asynchronous tasks inside a Functions such as
-      // writing to the Firebase Realtime Database.
-      // Setting an "uppercase" sibling in the Realtime Database returns a Promise.
-      return snapshot.ref.parent.child('uppercase').set(uppercase);
-    });
-
-
 exports.newResultsBackup = functions.firestore
   .document('results/{resultId}').onCreate((snap, context) => {
     return backupResults(snap, context, 'create');
@@ -73,6 +61,21 @@ exports.newResultsBackup = functions.firestore
 exports.resultsBackup = functions.firestore
   .document('results/{resultId}').onUpdate((snap, context) => {
     return backupResults(snap, context, 'update');
+  });
+
+exports.deleteSessionsFromCustomer = functions.firestore
+  .document('customers/{customerId}').onDelete((snap, context) => {
+    db.collection("sessions").where("customer", "==", snap.params.customerId).orderBy("fecha_visita").get().then( querySnapshot => {
+      var idList = [];
+      querySnapshot.forEach(doc => {
+        idList.push(doc.data().id);
+      });
+      idList.forEach(id => { db.collection("sessions").doc(id).delete() });
+      return 0;
+    }).catch((error) => {
+      return 0;
+    })
+    return 0;
   });
 
 function backupResults (snap, context, eventName) {

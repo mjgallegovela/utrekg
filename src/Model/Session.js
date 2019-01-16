@@ -2,7 +2,7 @@ class Session {
     constructor(){
         this.id = null;
         this.customer = null;
-        this.fecha_visita = new Date();
+        this.fecha_visita = (new Date()).toISOString();
         this.creatorUser = "";
 
         // Pestañas
@@ -112,6 +112,7 @@ class Session {
         this.t_cara_septal = 0; //select
         this.t_cara_anterior = 0; //select
         this.t_cara_lateral_alta = 0; //select
+        this.ekg_img = "";
 
         // AP
         this.fumador = 0; // select

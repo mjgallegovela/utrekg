@@ -11,6 +11,7 @@ export default class List extends React.Component {
         super(props);
         this.load = this.load.bind(this);
         this.delete = this.delete.bind(this);
+        this.confirmDelete = this.confirmDelete.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.state = {
             pagina: 1,
@@ -41,6 +42,23 @@ export default class List extends React.Component {
                 collection.push(doc.data());
             });
             this.setState({collection: collection, loaded: true, message: {txt: "", type: "info", showClose: false, closeCallback: undefined}});
+        });
+    }
+
+    confirmDelete(id) {
+        var that = this;
+        this.setState({
+            message: {
+                txt: "¿Estás seguro de querer borrar este usuario?", 
+                type: "default", 
+                acceptCancel: true, 
+                handleAccept: () => {
+                    that.delete(id);
+                },
+                handleCancel: () => {
+                    that.setState({message: {txt: "", type: "info", showClose: false, closeCallback: undefined}});
+                }
+            }
         });
     }
 
@@ -95,7 +113,7 @@ export default class List extends React.Component {
                                 <Link to={'/private/detail/' + result.id} className="btn btn-primary">
                                     <Glyphicon glyph="pencil" />
                                 </Link>
-                                <Button bsStyle="danger" onClick={() => this.delete(result.id)}>
+                                <Button bsStyle="danger" onClick={() => this.confirmDelete(result.id)}>
                                     <Glyphicon glyph="trash" />
                                 </Button>
                             </td>

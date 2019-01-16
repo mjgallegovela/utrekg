@@ -16,6 +16,12 @@ export default class Detail extends React.Component {
                         <Button bsStyle={this.props.message.type} onClick={this.props.handleCloseModal}>Aceptar</Button>
                     </Modal.Footer>
                     )}
+                    {this.props.message.acceptCancel && (
+                    <Modal.Footer>
+                        <Button bsStyle={"success"} onClick={this.props.message.handleAccept}>Aceptar</Button>
+                        <Button bsStyle={"danger"} onClick={this.props.message.handleCancel}>Cancelar</Button>
+                    </Modal.Footer>
+                    )}
                 </Modal>
             </div>
         );
