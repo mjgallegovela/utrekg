@@ -28,6 +28,8 @@ export default class Detail extends React.Component {
         this.saveSessions = this.saveSessions.bind(this);
         this.openFile = this.openFile.bind(this);
         this.uploadEkg = this.uploadEkg.bind(this);
+        this.removeEkg = this.removeEkg.bind(this);
+        this.setDateTimeValueCurrentVisit = this.setDateTimeValueCurrentVisit.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -116,10 +118,11 @@ export default class Detail extends React.Component {
         if(this.state.exists){
             this.props.fb.firestore().collection("customers").doc(this.state.id).set(result)
             .then(function(docRef) {
-                that.saveSessions(this.state.id, () => { that.showMessage("Guardado con éxito", "success", true); } );
+                that.saveSessions(that.state.id, () => { that.showMessage("Guardado con éxito", "success", true); } );
             })
             .catch(function(error) {
                 that.showMessage("Error al guardar, inténtalo de nuevo", "error", true);
+                console.log(error);
             });
         } else {
             result.fecha_registro = new Date().toISOString();
@@ -144,6 +147,7 @@ export default class Detail extends React.Component {
                             });
                         });
                     }).catch((error) => {
+                        console.log("Error aki")
                         that.showMessage("Error al guardar, inténtalo de nuevo", "danger", true);
                         console.log(error);
                     });
@@ -166,7 +170,6 @@ export default class Detail extends React.Component {
                 if(++saved >= total) {
                     callback();
                 }
-
             });
         });
     }
@@ -223,6 +226,12 @@ export default class Detail extends React.Component {
         this.setState({message: {txt: txt, type: type, showClose: showClose}})
     }
 
+    setDateTimeValueCurrentVisit(key, value) {
+        var visits = this.state.visits;
+        visits[this.state.visit][key] = value;
+        this.setState({visits: visits});
+    }
+
     openFile() {
         this.fileEkg.click();
     }
@@ -238,7 +247,7 @@ export default class Detail extends React.Component {
         // Child references can also take paths delimited by '/'
         let ekgImgRef = storageRef.child('ekgs/' + this.state.visits[this.state.visit].id + '.jpg');
 
-        const task = ekgImgRef.put(file).then(snapshot => {
+        ekgImgRef.put(file).then(snapshot => {
             ekgImgRef.getDownloadURL().then( url =>  {
                 that.state.visits[that.state.visit].ekg_img = url;
                 that.showMessage("", "info", false);
@@ -246,6 +255,12 @@ export default class Detail extends React.Component {
         }).catch(error => {
             that.showMessage("Ocurrio un error al subir el archivo.  Por favor, inténtelo de nuevo.", "danger", true);
         });
+    }
+
+    removeEkg() {
+        const visits = this.state.visits;
+        visits[this.state.visit].ekg_img = "";
+        this.setState({visits: visits});
     }
 
     render() {
@@ -995,7 +1010,7 @@ export default class Detail extends React.Component {
                             {(this.state.visits[this.state.visit].ekg_img === undefined || this.state.visits[this.state.visit].ekg_img === "") && (
                                 <div className='row'>
                                     <div className="col-xs-12 col-xs-offset-0 col-sm-4 col-sm-offset-8 col-md-3 col-md-offset-9">
-                                        <Button bsStyle="info" block={true} onClick={this.openFile}><Glyphicon glyph="plus"/> Adjuntar EKG</Button>
+                                        <Button bsStyle="primary" block={true} onClick={this.openFile}><Glyphicon glyph="plus-sign"/> Adjuntar EKG</Button>
                                         <input
                                             ref={input => this.fileEkg = input}
                                             type="file"
@@ -1008,8 +1023,11 @@ export default class Detail extends React.Component {
                             )}
                             {(this.state.visits[this.state.visit].ekg_img !== undefined && this.state.visits[this.state.visit].ekg_img !== "") && (
                                 <div className='row'>
+                                    <div className="col-xs-12 text-right">
+                                        <Button bsStyle="danger" block={true} onClick={this.removeEkg}><Glyphicon glyph="remove-sign"/> Eliminar EKG</Button>
+                                    </div>
                                     <div className="col-xs-12">
-                                        <img src={this.state.visits[this.state.visit].ekg_img} className="ekg"></img>
+                                        <img alt="EKG" src={this.state.visits[this.state.visit].ekg_img} className="ekg"></img>
                                     </div>
                                 </div>
                             )}
@@ -1021,10 +1039,7 @@ export default class Detail extends React.Component {
                                         value={this.state.visits[this.state.visit].fecha_ECG} 
                                         onChange={
                                             (isoString) => {
-                                                
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_ECG = isoString;
-                                                this.setState({result: stateResult});
+                                                this.setDateTimeValueCurrentVisit('fecha_ECG', isoString);
                                             }}
                                         />    
                                 </div>
@@ -1827,10 +1842,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_DM} 
                                             onChange={
                                                 (isoString) => {
-                                                    
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_DM = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_DM', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -1870,10 +1882,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_IC} 
                                             onChange={
                                                 (isoString) => {
-                                                    
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_IC = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_IC', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -1901,10 +1910,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_FA} 
                                             onChange={
                                                 (isoString) => {
-                                                    
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_FA = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_FA', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -1933,10 +1939,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_ictus} 
                                             onChange={
                                                 (isoString) => {
-                                                    
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_ictus = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_ictus', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -1965,10 +1968,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_carotidas} 
                                             onChange={
                                                 (isoString) => {
-                                                    
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_carotidas = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_carotidas', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -1994,10 +1994,8 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_dgtco_claudicacion} 
                                             onChange={
                                                 (isoString) => {
+                                                    this.setDateTimeValueCurrentVisit('fecha_dgtco_claudicacion', isoString);
                                                     
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_dgtco_claudicacion = isoString;
-                                                    this.setState({result: stateResult});
                                                 }}
                                             />    
                                     </div>
@@ -2023,9 +2021,7 @@ export default class Detail extends React.Component {
                                             value={this.state.visits[this.state.visit].fecha_cardiop_isquemica} 
                                             onChange={
                                                 (isoString) => {
-                                                    var stateResult = this.state.result;
-                                                    stateResult.fecha_cardiop_isquemica = isoString;
-                                                    this.setState({result: stateResult});
+                                                    this.setDateTimeValueCurrentVisit('fecha_cardiop_isquemica', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -2115,9 +2111,7 @@ export default class Detail extends React.Component {
                                         value={this.state.visits[this.state.visit].fecha_analitica} 
                                         onChange={
                                             (isoString) => {
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_analitica = isoString;
-                                                this.setState({result: stateResult});
+                                                this.setDateTimeValueCurrentVisit('fecha_analitica', isoString);
                                             }}
                                         />    
                                 </div>
@@ -2441,9 +2435,7 @@ export default class Detail extends React.Component {
                                         value={this.state.visits[this.state.visit].fecha_ecocardio} 
                                         onChange={
                                             (isoString) => {
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_ecocardio = isoString;
-                                                this.setState({result: stateResult});
+                                                this.setDateTimeValueCurrentVisit('fecha_ecocardio', isoString);
                                             }}
                                         />    
                                 </div>
@@ -2569,9 +2561,7 @@ export default class Detail extends React.Component {
                                         value={this.state.visits[this.state.visit].fecha_fondo_ojo} 
                                         onChange={
                                             (isoString) => {
-                                                var stateResult = this.state.result;
-                                                stateResult.fecha_fondo_ojo = isoString;
-                                                this.setState({result: stateResult});
+                                                this.setDateTimeValueCurrentVisit('fecha_fondo_ojo', isoString);
                                             }}
                                         />    
                                 </div>

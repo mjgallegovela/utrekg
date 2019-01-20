@@ -7,22 +7,6 @@ admin.initializeApp();
 var db = admin.firestore();
 var bucket = admin.storage().bucket("utrekg-2018.appspot.com");
 
-// Take the text parameter passed to this HTTP endpoint and insert it into the
-// Realtime Database under the path /messages/:pushId/original
-/*
-
-exports.addMessage = functions.https.onRequest((req, res) => {
-  // Grab the text parameter.
-  const original = req.query.text;
-  // Push the new message into the Realtime Database using the Firebase Admin SDK.
-  return admin.database().ref('/messages').push({original: original}).then((snapshot) => {
-    // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
-    return res.redirect(303, snapshot.ref.toString());
-  });
-});
-
-*/
-
 exports.createCompleteBackup = functions.https.onRequest((req, res) => {
 
 //functions.https.onRequest((req, res) => {
@@ -77,6 +61,38 @@ exports.deleteSessionsFromCustomer = functions.firestore
     })
     return 0;
   });
+
+exports.removeEkgIfEmpty = functions.firestore
+  .document('sessions/{sessionId}').onUpdate((snap, context) => {
+    if(snap.data.get("ekg_img") === "") {
+      console.log("Borrando: ekgs/" + snap.data.get("id") + '.jpg');
+      const ekgImg = bucket.file('ekgs/' + snap.data.get("id") + '.jpg')
+      ekgImg.delete().then(function() {
+        console.log("Fichero borrado correctamente");
+        return 0;
+      }).catch(function(error) {
+        console.log("Error Borrando: ekgs/" + snap.data.get("id") + '.jpg');
+        return 0;
+      });
+    }
+    /*
+    db.collection("sessions").where("customer", "==", snap.params.customerId).orderBy("fecha_visita").get().then( querySnapshot => {
+      var idList = [];
+      querySnapshot.forEach(doc => {
+        idList.push(doc.data().id);
+      });
+      idList.forEach(id => { db.collection("sessions").doc(id).delete() });
+      return 0;
+    }).catch((error) => {
+      return 0;
+    });
+    */
+    return 0;
+  });
+
+
+
+
 
 function backupResults (snap, context, eventName) {
   var date = new Date();
