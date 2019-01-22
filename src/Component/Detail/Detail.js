@@ -31,6 +31,7 @@ export default class Detail extends React.Component {
         this.removeEkg = this.removeEkg.bind(this);
         this.setDateTimeValueCurrentVisit = this.setDateTimeValueCurrentVisit.bind(this);
         this.removeCurrentSession = this.removeCurrentSession.bind(this);
+        this.deleteCustomer = this.deleteCustomer.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -176,10 +177,6 @@ export default class Detail extends React.Component {
         this.setState({visit: event.target.value});
     }
 
-    handleCloseModal() {
-        this.setState({message: {txt: "", type: "info", showClose: false}});
-    }
-
     handleSelect(eventKey) {
         this.setState({tabkey: eventKey});
     }
@@ -244,8 +241,44 @@ export default class Detail extends React.Component {
         });
     }
 
-    showMessage(txt, type, showClose){
-        this.setState({message: {txt: txt, type: type, showClose: showClose}})
+    deleteCustomer() {
+        var that = this;
+
+        if(this.state.exists){
+            this.setState({
+                message: {
+                    txt: "¿Estás seguro de querer borrar este usuario?", 
+                    type: "default", 
+                    acceptCancel: true, 
+                    handleAccept: () => {
+                        var id = that.state.id;
+                        that.showMessage("Borrando paciente...", "info", false);
+                        that.props.fb.firestore().collection("customers").doc(id).delete().then(function() {
+                            that.showMessage("Se ha borrado el usuario", "success", true, () => window.location = "/");
+                        }).catch(function(error) {
+                            that.showMessage("Se produjo un error, inténtalo de nuevo.", "danger", true, () => that.refresh());
+                        });
+                    },
+                    handleCancel: () => {
+                        that.setState({message: {txt: "", type: "info", showClose: false, closeCallback: undefined}});
+                    }
+                }
+            });
+        } else {
+            this.showMessage("No puede borrar un usuario hasta que no lo guarde previamente", "danger", false);
+        }
+    }
+
+    showMessage(txt, type, showClose, closeCallback){
+        this.setState({message: {txt: txt, type: type, showClose: showClose, closeCallback: closeCallback}});
+    }
+
+    handleCloseModal() {
+        var callback = this.state.message.closeCallback ? this.state.message.closeCallback : () => {};
+        this.setState(
+            {message: {txt: "", type: "info", showClose: false}}, 
+            callback()
+        );
     }
 
     setDateTimeValueCurrentVisit(key, value) {
@@ -302,7 +335,8 @@ export default class Detail extends React.Component {
                     <h3 className={'teal-text'}>{this.state.exists ? 'Editar Usuario: ' + this.state.id : 'Crear Nuevo Usuario'}</h3>
                 </div>
                 <CustomModal handleCloseModal={this.handleCloseModal} message={this.state.message} />
-                <div className="row btns">
+                {!this.state.exists && (
+                    <div className="row btns">
                     <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
                         {this.state.exists ? 'Creado por: ' + this.state.result.creatorUser : ''}
                     </div>
@@ -311,6 +345,20 @@ export default class Detail extends React.Component {
                         <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
                     </div>
                 </div>
+                )}
+                {this.state.exists && (
+                    <div className="row btns">
+                        <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
+                            {this.state.exists ? 'Creado por: ' + this.state.result.creatorUser : ''}
+                        </div>
+                        <div className="col-xs-12 col-xs-offset-0 col-sm-4 col-md-4 col-lg-3 col-lg-offset-3">
+                            <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
+                        </div>
+                        <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
+                            <Button bsStyle="danger" block={true} onClick={this.deleteCustomer}><Glyphicon glyph="floppy-disk"/> Eliminar</Button>
+                        </div>
+                    </div>
+                )}
                 <div className='row'>
                     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                         <FieldGroup
