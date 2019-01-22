@@ -30,6 +30,7 @@ export default class Detail extends React.Component {
         this.uploadEkg = this.uploadEkg.bind(this);
         this.removeEkg = this.removeEkg.bind(this);
         this.setDateTimeValueCurrentVisit = this.setDateTimeValueCurrentVisit.bind(this);
+        this.removeCurrentSession = this.removeCurrentSession.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -70,27 +71,12 @@ export default class Detail extends React.Component {
                         querySnapshot.forEach(doc => {
                             visitCollection.push(doc.data());
                         });
-
-                        if(visitCollection.length <= 0) {
-                            that.setState({
-                                result: customer, 
-                                visits: visitCollection,
-                                visit: 0,
-                            }, 
-                            () => {
-                                that.newSession(); 
-                                that.saveSessions(that.state.id, () => {
-                                    that.setState({message: {txt: "", type: "info", showClose: false}}); 
-                                });
-                            });
-                        } else {
-                            that.setState({
-                                result: customer, 
-                                visits: visitCollection,
-                                visit: visitCollection.length - 1,
-                                message: {txt: "", type: "info", showClose: false}
-                            });
-                        }
+                        that.setState({
+                            result: customer, 
+                            visits: visitCollection,
+                            visit: (visitCollection.length <= 0)?0:(visitCollection.length - 1),
+                            message: {txt: "", type: "info", showClose: false}
+                        });
                     });
             }).catch(function(error) {
                 console.log(error);
@@ -139,15 +125,10 @@ export default class Detail extends React.Component {
                         that.setState({
                             id: strId,
                             exists: true,
-                            result: result
-                        }, () => {
-                            that.newSession();
-                            this.saveSessions(strId, () => {
-                                that.setState({ message: { txt: "Guardado con éxito", type: "success", showClose: true, closeCallback: () => {} }});
-                            });
+                            result: result,
+                            message: { txt: "Guardado con éxito", type: "success", showClose: true, closeCallback: () => {} }
                         });
                     }).catch((error) => {
-                        console.log("Error aki")
                         that.showMessage("Error al guardar, inténtalo de nuevo", "danger", true);
                         console.log(error);
                     });
@@ -157,21 +138,25 @@ export default class Detail extends React.Component {
     }
 
     saveSessions(customerId, callback) {
-        console.log("entra saveSessions")
         let total = this.state.visits.length;
         let saved = 0;
-        map(this.state.visits, (session, key) => {
-            var sessionRawObject = {};
-            map(session, (propertyValue, key) => {
-                sessionRawObject[key] = propertyValue;
+        if(this.state.visits.length <= 0) {
+            callback();
+        } else {
+            map(this.state.visits, (session, key) => {
+                var sessionRawObject = {};
+                map(session, (propertyValue, key) => {
+                    sessionRawObject[key] = propertyValue;
+                });
+                sessionRawObject.customer = customerId;
+                this.props.fb.firestore().collection("sessions").doc(session.id).set(sessionRawObject).then(() =>{
+                    if(++saved >= total) {
+                        callback();
+                    }
+                });
             });
-            sessionRawObject.customer = customerId;
-            this.props.fb.firestore().collection("sessions").doc(session.id).set(sessionRawObject).then(() =>{
-                if(++saved >= total) {
-                    callback();
-                }
-            });
-        });
+        }
+        
     }
 
     handleCustomerValueChange(event) {
@@ -218,8 +203,45 @@ export default class Detail extends React.Component {
         newSession.id =  this.state.id + "_" + moment().format("YYYYMMDDHHmmss");
         let sessions = this.state.visits;
         sessions.push(newSession);
-        console.log(sessions.length);
-        this.setState({visits: sessions, visit: sessions.length-1});
+        var that = this;
+        this.setState({visits: sessions, visit: sessions.length-1}, () => {
+            that.showMessage("Visita creada.  Recuerde que debe guardar los cambios antes de salir del detalle del paciente.", "success", true)
+        });
+    }
+    
+    removeCurrentSession() {
+        var that = this;
+        this.setState({
+            message: {
+                txt: "Esta operación no se puede deshacer, ¿está seguro de querer continuar?", 
+                type: "default", 
+                acceptCancel: true, 
+                handleAccept: () => {
+                    var visitList = that.state.visits;
+                    var newVisitList =  [];
+                    var found = false;
+                    var iter = 0;
+                    var sessionToRemove = null;
+                    visitList.forEach(visit => {
+                        if(found || that.state.visit !== iter) {
+                            newVisitList.push(visit);
+                        } else {
+                            sessionToRemove = visit;
+                        }
+                        found = that.state.visit === iter++;
+                    });
+
+                    that.props.fb.firestore().collection("sessions").doc(sessionToRemove.id).delete().then(() =>{
+                        that.setState({visit: 0, visits: newVisitList});
+                        that.showMessage("Visita borrada con exito", "success", true);
+                    });
+                    
+                },
+                handleCancel: () => {
+                    that.setState({message: {txt: "", type: "info", showClose: false, closeCallback: undefined}});
+                }
+            }
+        });
     }
 
     showMessage(txt, type, showClose){
@@ -374,13 +396,14 @@ export default class Detail extends React.Component {
                             />
                     </div>
                 </div>
+                
                 {this.state.visits.length > 0 && (
                     <div>
                         <div className="pageTitle">
                             <h3 className={'teal-text'}>Visitas</h3>
                         </div>
                         <div className="row">
-                            <div className="col-xs-12 col-sm-8">
+                            <div className="col-xs-8 col-sm-8 col-md-8 col-lg-6">
                                 <SelectFieldGroup
                                     id="visitaInput" 
                                     label="Visita"
@@ -390,9 +413,13 @@ export default class Detail extends React.Component {
                                     options={visitsOptions}
                                     />
                             </div>
-                            <div className="col-xs-12 col-sm-4">
+                            <div className="col-xs-2 col-sm-2 col-md-4 col-lg-3">
                                 <ControlLabel>&nbsp;</ControlLabel>
-                                <Button bsStyle="primary" block={true} onClick={this.newSession}><Glyphicon glyph="plus"/> Nueva visita</Button>
+                                <Button bsStyle="primary" block={true} onClick={this.newSession}><Glyphicon glyph="plus"/><span className="hidden-xs hidden-sm"> Nueva visita</span></Button>
+                            </div>
+                            <div className="col-xs-2 col-xs-offset-0 col-sm-2 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-0">
+                                <ControlLabel>&nbsp;</ControlLabel>
+                                <Button bsStyle="danger" block={true} onClick={this.removeCurrentSession}><Glyphicon glyph="plus"/><span className="hidden-xs hidden-sm"> Eliminar esta visita</span></Button>
                             </div>
                         </div>
                         <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
@@ -1023,11 +1050,11 @@ export default class Detail extends React.Component {
                             )}
                             {(this.state.visits[this.state.visit].ekg_img !== undefined && this.state.visits[this.state.visit].ekg_img !== "") && (
                                 <div className='row'>
-                                    <div className="col-xs-12 text-right">
-                                        <Button bsStyle="danger" block={true} onClick={this.removeEkg}><Glyphicon glyph="remove-sign"/> Eliminar EKG</Button>
-                                    </div>
                                     <div className="col-xs-12">
                                         <img alt="EKG" src={this.state.visits[this.state.visit].ekg_img} className="ekg"></img>
+                                    </div>
+                                    <div className="col-xs-12 col-xs-offset-0 col-sm-4 col-sm-offset-8 col-md-3 col-md-offset-9">
+                                        <Button bsStyle="danger" block={true} onClick={this.removeEkg}><Glyphicon glyph="remove-sign"/> Eliminar EKG</Button>
                                     </div>
                                 </div>
                             )}
@@ -2637,13 +2664,21 @@ export default class Detail extends React.Component {
                             </div>
                         </div>
                         )}
-                        <div className="row btns top">
-                            <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
-                                <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
-                            </div>
-                        </div>
+                        
                     </div>
                 )}
+                <div className="row btns top">
+                    {this.state.visits.length <= 0 && this.state.exists && (
+                        <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
+                            <Button bsStyle="primary" block={true} onClick={this.newSession}>Crear visita</Button>
+                        </div>
+                    )}
+                    {this.state.visits.length > 0  && this.state.exists && (
+                        <div className="col-xs-12 col-sm-4 col-sm-offset-8 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-9">
+                            <Button bsStyle="success" block={true} onClick={this.save}>Guardar</Button>
+                        </div>
+                    )}
+                </div>
             </div>
         );
         return result;
