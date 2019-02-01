@@ -42,7 +42,7 @@ firebase.auth().signInWithEmailAndPassword("galdamer@gmail.com", "03Enero1984")
                     } else {
                         console.log(data.id + ": " + data.fecha_registro);
                     }
-                    firstSession.id = data.id + "_" + momentDate.format("YYYYMMDD");
+                    firstSession.id = data.id + "_" + momentDate.format("YYYYMMDDHHmmss");
                     firstSession.customer = data.id;
                     firstSession.fecha_visita = data.fecha_registro;
 
@@ -56,6 +56,9 @@ firebase.auth().signInWithEmailAndPassword("galdamer@gmail.com", "03Enero1984")
                     map(newCustomer, (value, key) => {
                         newCustomerObject[key] = value;
                     });
+
+                    newCustomerObject.apellidosearch = (newCustomerObject.apellido1 !== undefined && newCustomerObject.apellido1 !== null)?
+                        newCustomerObject.apellido1.toLowerCase():"";
                     
                     firebase.firestore().collection("customers").doc(data.id).set(newCustomerObject).then(() => {
                         console.log(data.id + ": " + data.nombre + " " + data.apellido1 + " " + data.apellido2);

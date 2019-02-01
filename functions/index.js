@@ -8,32 +8,7 @@ var db = admin.firestore();
 var bucket = admin.storage().bucket("utrekg-2018.appspot.com");
 
 exports.createCompleteBackup = functions.https.onRequest((req, res) => {
-
-//functions.https.onRequest((req, res) => {
   let now = new Date();
-  /*
-  db.collection('results').get().then(querySnapshot => {
-    let list = [];
-    querySnapshot.forEach(doc => { 
-      list.push(doc);
-    });
-
-    const file = myBucket.file('backups/' + now.getFullYear() + now.getMonth() + now.getDay() + "/all.json");
-    const contents = JSON.stringify(list);
-
-    //-
-    // If the callback is omitted, we'll return a Promise.
-    //-
-    file.save(contents).then(function() {
-      return { result: 0 };
-    }).catch(ex => {
-      console.log("Error saving file:", ex);
-    });
-    return { result: 0 };
-  }).catch(ex => {
-    console.log("Error getting documents:", ex);
-  });
-  */
   res.send("Hello");
 });
 

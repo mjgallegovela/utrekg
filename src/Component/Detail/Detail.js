@@ -100,6 +100,7 @@ export default class Detail extends React.Component {
         map(currentState, (value, key) => {
             result[key] = value;
         });
+        result.apellidosearch = (result.apellido1 !== undefined && result.apellido1 !== null)?result.apellido1.toLowerCase():"";
         this.setState({result: currentState});
         var that = this;
         if(this.state.exists){
@@ -369,6 +370,7 @@ export default class Detail extends React.Component {
                             onChange={this.handleCustomerValueChange}
                             name='identificacion'
                             value={this.state.result.identificacion}
+                            className={"mayus"}
                             />
                     </div>
                 </div>

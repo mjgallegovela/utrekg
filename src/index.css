@@ -8,3 +8,11 @@ body {
   padding-top: 15px;
   padding-bottom: 15px;
 }
+
+.mayus {
+  text-transform: uppercase;
+}
+
+.minus {
+  text-transform: lowercase;
+}
