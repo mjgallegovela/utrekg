@@ -14,6 +14,7 @@ const SEARCH_OPTIONS = {
     ORDER_BY_ID: 1,
     ORDER_BY_DATE: 2,
     ORDER_BY_SURNAME: 3,
+    ORDER_BY_IDENTIFICATION: 4
 }
 
 export default class List extends React.Component {
@@ -35,7 +36,7 @@ export default class List extends React.Component {
             collection: [],
             loaded: false,
             message: {txt: "", type: "info", showClose: false, closeCallback: undefined},
-            searchMode: 1,
+            searchMode: SEARCH_OPTIONS.ORDER_BY_SURNAME,
             filter: "",
             currentPage: 0,
             itemsPage: 10,
@@ -70,6 +71,12 @@ export default class List extends React.Component {
             ref = this.props.fb.firestore().collection("customers").orderBy("apellidosearch", "asc");
             if(this.state.filter !== ""){
                 ref = ref.startAt(this.state.filter).endAt(this.state.filter+'\uf8ff')
+            }
+        } else if(this.state.searchMode === SEARCH_OPTIONS.ORDER_BY_ID) {
+            ref = this.props.fb.firestore().collection("customers").orderBy("id", "desc");
+            if(this.state.filter !== ""){
+                console.log(this.state.filter);
+                ref = ref.startAt(this.state.filter+'\uf8ff').endAt(this.state.filter)
             }
         } else {
             ref = this.props.fb.firestore().collection("customers").orderBy("identificacion", "asc");
@@ -196,15 +203,32 @@ export default class List extends React.Component {
                                 onChange={this.changeSearchMode}
                                 name='searchMode'
                                 options={[
-                                    {value: SEARCH_OPTIONS.ORDER_BY_ID, label: "Identificación"},
-                                    {value: SEARCH_OPTIONS.ORDER_BY_DATE, label: "Fecha de registro"},
                                     {value: SEARCH_OPTIONS.ORDER_BY_SURNAME, label: "Primer Apellido"},
+                                    {value: SEARCH_OPTIONS.ORDER_BY_ID, label: "ID"},
+                                    {value: SEARCH_OPTIONS.ORDER_BY_IDENTIFICATION, label: "Identificación"},
+                                    {value: SEARCH_OPTIONS.ORDER_BY_DATE, label: "Fecha de registro"},
                                 ]}
                             />
                         </div>
                     </div>
                     
                     {this.state.searchMode === SEARCH_OPTIONS.ORDER_BY_ID && (
+                        <div className="row">
+                            <div className="col-xs-12 col-md-6">
+                                <FieldGroup
+                                    id="idInput"
+                                    type="text"
+                                    label="ID"
+                                    placeholder="ID"
+                                    onChange={this.setFilterValue}
+                                    name='filter'
+                                    value={this.state.filter}
+                                    className={"mayus"}
+                                    />
+                            </div>
+                        </div>  
+                    )}
+                    {this.state.searchMode === SEARCH_OPTIONS.ORDER_BY_IDENTIFICATION && (
                         <div className="row">
                             <div className="col-xs-12 col-md-6">
                                 <FieldGroup

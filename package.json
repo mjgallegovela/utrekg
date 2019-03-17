@@ -10,6 +10,7 @@
     "firebase": "^4.10.1",
     "firebase-functions": "^2.0.5",
     "moment": "^2.22.2",
+    "pdfkit": "^0.9.0",
     "prop-types": "^15.6.1",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",

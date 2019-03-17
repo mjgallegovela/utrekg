@@ -12,18 +12,19 @@ exports.createCompleteBackup = functions.https.onRequest((req, res) => {
   res.send("Hello");
 });
 
-exports.newResultsBackup = functions.firestore
+exports.triggerCreateResult = functions.firestore
   .document('results/{resultId}').onCreate((snap, context) => {
     return backupResults(snap, context, 'create');
   });
 
-exports.resultsBackup = functions.firestore
+exports.triggerUpdateResult = functions.firestore
   .document('results/{resultId}').onUpdate((snap, context) => {
     return backupResults(snap, context, 'update');
   });
 
-exports.deleteSessionsFromCustomer = functions.firestore
+exports.triggerDeleteCustomer = functions.firestore
   .document('customers/{customerId}').onDelete((snap, context) => {
+    console.log("Deleting customer: " + snap.params.customerId);
     db.collection("sessions").where("customer", "==", snap.params.customerId).orderBy("fecha_visita").get().then( querySnapshot => {
       var idList = [];
       querySnapshot.forEach(doc => {
@@ -37,8 +38,10 @@ exports.deleteSessionsFromCustomer = functions.firestore
     return 0;
   });
 
-exports.removeEkgIfEmpty = functions.firestore
+exports.triggerUpdateSession = functions.firestore
   .document('sessions/{sessionId}').onUpdate((snap, context) => {
+    // remove Ekg If Empty
+    console.log("Updating session: " + snap.data.get("id"));
     if(snap.data.get("ekg_img") === "") {
       console.log("Removing: ekgs/" + snap.data.get("id") + '.jpg');
       const ekgImg = bucket.file('ekgs/' + snap.data.get("id") + '.jpg')
@@ -53,8 +56,10 @@ exports.removeEkgIfEmpty = functions.firestore
     return 0;
   });
 
-exports.removeEkgSessionRemoved = functions.firestore
+exports.triggerDeleteSession = functions.firestore
   .document('sessions/{sessionId}').onDelete((snap, context) => {
+    // removeEkgSessionRemoved
+    console.log("Removing session: " + snap.params.sessionId);
     console.log("Removing: ekgs/" + snap.params.sessionId + '.jpg');
     const ekgImg = bucket.file('ekgs/' + snap.params.sessionId + '.jpg')
     ekgImg.delete().then(function() {
@@ -88,3 +93,7 @@ function backupResults (snap, context, eventName) {
   */
   return 0;
 }
+
+/** Util
+
+**/

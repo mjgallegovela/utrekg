@@ -12,6 +12,8 @@ import FieldGroup from '../Form/FieldGroup';
 import SelectFieldGroup from '../Form/SelectFieldGroup';
 import CustomModal from '../Form/Modal/CustomModal';
 
+import {customerToCSV} from '../../Provider/Export';
+
 var moment = require('moment');
 
 export default class Detail extends React.Component {
@@ -32,6 +34,7 @@ export default class Detail extends React.Component {
         this.setDateTimeValueCurrentVisit = this.setDateTimeValueCurrentVisit.bind(this);
         this.removeCurrentSession = this.removeCurrentSession.bind(this);
         this.deleteCustomer = this.deleteCustomer.bind(this);
+        this.exportCSV = this.exportCSV.bind(this);
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -91,6 +94,13 @@ export default class Detail extends React.Component {
         } else {
             this.setState({result: new Customer(), visits: [], visit: 0});
         }
+    }
+
+    exportCSV() {
+        
+
+        var file = customerToCSV(this.state.result, this.state.visits)
+        window.open(URL.createObjectURL(file), 'ExportFile');
     }
 
     save() {
@@ -357,6 +367,9 @@ export default class Detail extends React.Component {
                         </div>
                         <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
                             <Button bsStyle="danger" block={true} onClick={this.deleteCustomer}><Glyphicon glyph="floppy-disk"/> Eliminar</Button>
+                        </div>
+                        <div className="col-xs-12 text-right">
+                            <Button bsStyle="primary" onClick={this.exportCSV}><Glyphicon glyph="floppy-disk"/> Exportar</Button>
                         </div>
                     </div>
                 )}
