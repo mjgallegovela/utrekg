@@ -1,7 +1,6 @@
-.row.btns {
-    margin-bottom: 20px
+.row.btns > div {
+    margin-bottom: 20px;
 }
-
 .tab-content {
     margin-left: 0 !important;
     border-left: 1px solid #222;
@@ -25,4 +24,6 @@
 
 img.ekg {
     width: 100%;
+    margin-bottom: 10px;
 }
+

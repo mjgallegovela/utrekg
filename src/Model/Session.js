@@ -19,21 +19,23 @@ class Session {
         this.TAS_MSI = "";
         this.TAD_MSI = "";
         this.expl_patolog = "";
-        this.fumador = 0; // Select
-        this.alcohol = 0; // Select
-
+        
         // TTO
         this.IECA = 0;
         this.cual_IECA = "";
+        this.tipo_predef_IECA = 0;
         this.dosis_IECA = 0;
         this.ARA_II = 0;
         this.cual_ARA_II = "";
+        this.tipo_predef_ARA_II = 0;
         this.dosis_ARA_II = 0;
         this.DIU_TIAZ = 0;
         this.cual_DIU_TIAZ = "";
+        this.tipo_predef_DIU_TIAZ = 0;
         this.dosis_DIU_TIAZ = 0;
         this.ACA_DHP = 0;
         this.cual_ACA_DHP = "";
+        this.tipo_predef_ACA_DHP = 0;
         this.dosis_ACA_DHP = 0;
         this.verap_dilt = 0;
         this.dosis_verap_dilt = 0;
@@ -48,23 +50,68 @@ class Session {
         this.dosis_aldost_inh = 0;
         this.diu_asa = 0;
         this.cual_diu_asa = "";
+        this.tipo_predef_diu_asa = 0;
         this.dosis_diu_asa = 0;
+
+        this.diu_aho_k = 0;
+        this.cual_diu_aho_k = 0; // Espironolactona/Eplerrenona
+        this.tipo_predef_aho_k = 0;
+        this.dosis_diu_aho_k = 0;
+
         this.aliskiren = 0;
         this.dosis_aliskiren = 0;
+
         this.AAS = 0;
+        this.AAS_DOSIS = "";
         this.clopidogrel = 0;
-        this.ACO = 0;
-        this.ESTATINAS = 0;
+        this.clopidogrel_dosis = "";
         this.METFORMINA = 0;
+        this.METFORMINA_DOSIS = "";
         this.SFU = 0;
+        this.SFU_DOSIS = "";
         this.GLICLAZ = 0;
+        this.GLICLAZ_DOSIS = "";
         this.GLITAZONAS = 0;
+        this.GLITAZONAS_DOSIS = "";
         this.IDPP4 = 0;
+        this.IDPP4_DOSIS = "";
         this.SGLT2 = 0;
+        this.SGLT2_DOSIS = "";
         this.GLP1 = 0;
-        this.INSULINA = 0;
+        this.GLP1_DOSIS = "";
+        this.fibratos = 0; // boolean
+        this.fibratos_dosis = "";
+        this.ezetimibe = 0; // boolean
+        this.ezetimibe_dosis = "";
+
         this.test_morisky_green = 0; // select
         
+        this.antiagregantes = 0; // Boolean
+        this.tipo_antiagregantes = "";
+        this.dosis_antiagregantes = 0;
+
+        this.ACO = 0; // boolean
+        this.tipo_acos = "";
+        this.tipo_predef_acos = 0;
+        this.dosis_acos = 0;
+
+        this.ESTATINAS = 0; // boolean
+        this.tipo_estatinas = "";
+        this.tipo_predef_estatinas = 0;
+        this.dosis_estatinas = 0;
+
+        this.ados = 0; // boolean
+        this.tipo_ados = "";
+        this.dosis_ados = 0;
+
+        this.fibratos = 0; // boolean
+        this.ezetimibe = 0; // boolean
+
+        this.INSULINA = 0; // boolean
+        this.INSULINA_DOSIS = "";
+        this.INSULINA_RAPIDA = 0;
+        this.INSULINA_RAPIDA_DOSIS = "";
+
         // ECG
         this.fecha_ECG	 = "";
         this.ritmo = 0; //select
@@ -107,12 +154,27 @@ class Session {
         this.ST = 0;  //select
         this.ST_alterado = 0; //select
         this.extrasistoles = 0; //select
+        this.t_en_I = 0; // select
+        this.t_en_II = 0; // select
+        this.t_en_III = 0; // select
+        this.t_en_AVL = 0; // select
+        this.t_en_AVF = 0; // select
+        this.t_en_AVR = 0;
+        this.t_en_V1 = 0;
+        this.t_en_V2 = 0;
+        this.t_en_V3 = 0;
+        this.t_en_V4 = 0;
+        this.t_en_V5 = 0;
+        this.t_en_V6 = 0;
+        /* Obsoletos 20190319
         this.t_cara_inferior = 0; //select
         this.t_cara_lateral = 0; //select
+        */
         this.t_cara_septal = 0; //select
         this.t_cara_anterior = 0; //select
         this.t_cara_lateral_alta = 0; //select
         this.ekg_img = "";
+        this.observaciones = "";
 
         // AP
         this.fumador = 0; // select
@@ -135,6 +197,8 @@ class Session {
         this.DLP = 0;
         this.IC = 0;
         this.fecha_dgtco_IC = "";
+        this.tep = 0;
+        this.fecha_suceso_tep = "";
         this.FA = 0;
         this.fecha_dgtco_FA = "";
         this.ictus = 0;
@@ -196,8 +260,10 @@ class Session {
         this.renal_estudio = 0; //bool
         this.patologia_renal = 0; //bool
         this.cual_patologia_renal = "";
-        this.proteinuria = 0;
-        
+        this.proteinuria_pruebas = 0;
+
+        // PLAN
+        this.plan_paciente = "";
     }
 }
 

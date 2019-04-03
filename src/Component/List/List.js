@@ -57,7 +57,6 @@ export default class List extends React.Component {
 
     load(){
         let ref = null;
-        console.log(this.state.searchMode);
         if (this.state.searchMode === SEARCH_OPTIONS.ORDER_BY_DATE) {
             ref = this.props.fb.firestore().collection("customers")
             if(this.state.filter.from !== ""){
@@ -75,7 +74,6 @@ export default class List extends React.Component {
         } else if(this.state.searchMode === SEARCH_OPTIONS.ORDER_BY_ID) {
             ref = this.props.fb.firestore().collection("customers").orderBy("id", "desc");
             if(this.state.filter !== ""){
-                console.log(this.state.filter);
                 ref = ref.startAt(this.state.filter+'\uf8ff').endAt(this.state.filter)
             }
         } else {

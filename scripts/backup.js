@@ -1,29 +1,28 @@
 // Required for side-effects
 var firebase = require("firebase");
-// Required for side-effects
-require("firebase/functions");
-
+require("firebase/firestore");
 var firebaseConfig = require("../src/Provider/Firebase-conf");
+var Customer = require("../src/Model/Customer");
+var Session = require("../src/Model/Session");
+var map = require('lodash/map');
+var moment = require('moment');
 
 firebase.initializeApp(firebaseConfig);
 
-// Initialize Cloud Functions through Firebase
-var functions = firebase.functions();
 
 firebase.auth().signInWithEmailAndPassword("galdamer@gmail.com", "03Enero1984")
     .then(res => {
         if(res){
-            var createCompleteBackup = functions.httpsCallable('createCompleteBackup');
-            createCompleteBackup().then(result => {
-                // Read result of the Cloud Function.
-                console.log("Success...");
-                console.log(result);
-                
-            }).catch(ex => {
-                console.log(ex);
+            firebase.firestore().collection("sessions")
+                .get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                    firebase.firestore().collection("sessions_backup").doc(doc.data().id).set(doc.data()).then(() => {
+                        console.log(doc.data().id);
+                    });
+                });
             });
         }
     }).catch(ex => {
         console.log("Error de usuario, compruebe su usuario y contraseña");
-        console.log(ex);
     });

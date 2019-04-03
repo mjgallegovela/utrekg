@@ -11,7 +11,7 @@ import DatePicker from '../Form/DatePicker/DatePicker';
 import FieldGroup from '../Form/FieldGroup';
 import SelectFieldGroup from '../Form/SelectFieldGroup';
 import CustomModal from '../Form/Modal/CustomModal';
-
+import Dictionary from '../../Provider/Dictionary';
 import {customerToCSV} from '../../Provider/Export';
 
 var moment = require('moment');
@@ -19,6 +19,7 @@ var moment = require('moment');
 export default class Detail extends React.Component {
     constructor(props) {
         super(props);
+        this.calculatedValues = this.calculatedValues.bind(this);
         this.save = this.save.bind(this);
         this.handleValueChange = this.handleValueChange.bind(this);
         this.handleCustomerValueChange = this.handleCustomerValueChange.bind(this);
@@ -35,6 +36,7 @@ export default class Detail extends React.Component {
         this.removeCurrentSession = this.removeCurrentSession.bind(this);
         this.deleteCustomer = this.deleteCustomer.bind(this);
         this.exportCSV = this.exportCSV.bind(this);
+        
         this.state = {
             exists: this.props.exists === 'true',
             loaded: false,
@@ -67,20 +69,32 @@ export default class Detail extends React.Component {
             var that = this;
             docRef.get().then(function(doc) {
                 let customer = doc.data();
-                that.props.fb.firestore().collection("sessions").where("customer", "==", that.state.id).orderBy("fecha_visita").get().then(
-                    querySnapshot => {
-
+                console.log("Carga el customer");
+                that.props.fb.firestore().collection("sessions").where("customer", "==", that.state.id).orderBy("fecha_visita").get()
+                    .then(querySnapshot => {
+                        console.log("Carga las sessions");
                         let visitCollection = [];
-                        
+                        let visitModel = new Session();
                         querySnapshot.forEach(doc => {
-                            visitCollection.push(doc.data());
+                            let visit = doc.data();
+                            map(visitModel, (value, key) => {
+                                // Predefined values in model
+                                if(visit[key] ===  undefined) {
+                                    visit[key] = value;
+                                }
+                            });
+                            visitCollection.push(visit);
                         });
+
                         that.setState({
                             result: customer, 
                             visits: visitCollection,
                             visit: (visitCollection.length <= 0)?0:(visitCollection.length - 1),
                             message: {txt: "", type: "info", showClose: false}
-                        });
+                        }, () => that.calculatedValues());
+                    }).catch( errorSessions => {
+                        console.log("Error cargando sessions");
+                        console.log(errorSessions);
                     });
             }).catch(function(error) {
                 console.log(error);
@@ -97,8 +111,6 @@ export default class Detail extends React.Component {
     }
 
     exportCSV() {
-        
-
         var file = customerToCSV(this.state.result, this.state.visits)
         window.open(URL.createObjectURL(file), 'ExportFile');
     }
@@ -181,8 +193,9 @@ export default class Detail extends React.Component {
         var newState = this.state.visits;
         newState[this.state.visit][event.target.name] = event.target.value;
         this.setState({visits: newState});
+        this.calculatedValues();
     }
-
+    
     handleSessionValueChange(event) {
         console.log("nueva session: " + event.target.value)
         this.setState({visit: event.target.value});
@@ -329,8 +342,37 @@ export default class Detail extends React.Component {
         this.setState({visits: visits});
     }
 
-    render() {
+    calculatedValues() {
+        
+        if(this.state !== undefined && this.state.visits.length > 0) {
+            // IMC
+            var newState = this.state.visits;
+            let currentState = this.state.visit;
+            let peso = parseFloat(newState[currentState].peso);
+            let altura = parseFloat(newState[currentState].altura);
 
+            if(!isNaN(altura) && altura > 0) {
+                newState[this.state.visit].IMC= (peso / (altura / 100) * (altura/100)).toFixed(2);
+                console.log("IMC: " + newState[this.state.visit].IMC);
+            } else {
+                newState[this.state.visit].IMC = "";
+            }
+
+            // filtrado glomerular (FG) en AP
+            var momentBirth = moment(new Date(this.state.result.fecha_nacimiento));
+            var edad = moment(new Date(newState[currentState].fecha_visita)).diff(momentBirth, 'years');
+            var coef = 1;
+            if(this.state.result.sexo === "M") {
+                coef = .85;
+            }
+            newState[currentState].FG = (coef * peso * (140-edad)/(72*newState[currentState].creatinina)).toFixed(2);
+            console.log("FG: " + newState[this.state.visit].FG);
+            this.setState({visits: newState});
+        }
+    }
+
+    render() {
+        
         let visitsOptions = [];
         let index = 1;
 
@@ -339,6 +381,19 @@ export default class Detail extends React.Component {
             let momentDate = moment(new Date(value.fecha_visita));
             visitsOptions.push({value: key, label: index + "ª visita (" + momentDate.format("DD-MM-YYYY") + " - " + value.creatorUser + ")"},)
         });
+
+        var dictionaryOptionsLists = {};
+        for(var dictionaryKey in Dictionary) {
+            if(dictionaryOptionsLists[dictionaryKey] === undefined) {
+                dictionaryOptionsLists[dictionaryKey] = [];
+            }
+            for(index in Dictionary[dictionaryKey]) {
+                dictionaryOptionsLists[dictionaryKey].push({ value: index, label: Dictionary[dictionaryKey][index] });
+            }
+        }
+        if(this.state.visits.length > 0) {
+            console.log(this.state.visits[this.state.visit]);
+        }
 
         const result = (
             <div>
@@ -366,10 +421,10 @@ export default class Detail extends React.Component {
                             <Button bsStyle="success" block={true} onClick={this.save}><Glyphicon glyph="floppy-disk"/> Guardar</Button>
                         </div>
                         <div className="col-xs-12 col-sm-4 col-md-4 col-lg-3">
-                            <Button bsStyle="danger" block={true} onClick={this.deleteCustomer}><Glyphicon glyph="floppy-disk"/> Eliminar</Button>
+                            <Button bsStyle="danger" block={true} onClick={this.deleteCustomer}><Glyphicon glyph="trash"/> Eliminar</Button>
                         </div>
-                        <div className="col-xs-12 text-right">
-                            <Button bsStyle="primary" onClick={this.exportCSV}><Glyphicon glyph="floppy-disk"/> Exportar</Button>
+                        <div className="col-xs-12 col-xs-offset-0 col-sm-4 col-sm-offset-8 col-md-4 col-lg-offset-9 col-lg-3 text-right">
+                            <Button bsStyle="primary" block={true} onClick={this.exportCSV}><Glyphicon glyph="download-alt"/> Exportar</Button>
                         </div>
                     </div>
                 )}
@@ -410,7 +465,7 @@ export default class Detail extends React.Component {
                             value={this.state.result.apellido1}
                             />
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-4 col-lg-4 col-lg-offset-0">
+                    <div className="col-xs-12 col-xs-offset-0 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4 col-lg-4 col-lg-offset-0">
                         <FieldGroup
                             id="apellido2Input"
                             type="text"
@@ -482,7 +537,7 @@ export default class Detail extends React.Component {
                             </div>
                             <div className="col-xs-2 col-xs-offset-0 col-sm-2 col-md-4 col-md-offset-8 col-lg-3 col-lg-offset-0">
                                 <ControlLabel>&nbsp;</ControlLabel>
-                                <Button bsStyle="danger" block={true} onClick={this.removeCurrentSession}><Glyphicon glyph="plus"/><span className="hidden-xs hidden-sm"> Eliminar esta visita</span></Button>
+                                <Button bsStyle="danger" block={true} onClick={this.removeCurrentSession}><Glyphicon glyph="trash"/><span className="hidden-xs hidden-sm"> Eliminar esta visita</span></Button>
                             </div>
                         </div>
                         <Nav bsStyle="tabs" activeKey={this.state.tabkey} onSelect={k => this.handleSelect(k)}>
@@ -504,6 +559,9 @@ export default class Detail extends React.Component {
                             <NavItem eventKey="6">
                                 PRUEBAS
                             </NavItem>
+                            <NavItem eventKey="7">
+                                PLAN
+                            </NavItem>
                         </Nav>
                     
                         {this.state.tabkey === "1" && (
@@ -515,19 +573,20 @@ export default class Detail extends React.Component {
                                         <FieldGroup
                                             id="pesoInput"
                                             type="number"
-                                            label="Peso"
-                                            placeholder="Peso"
+                                            label="Peso (Kg)"
+                                            placeholder="Peso (Kg)"
                                             onChange={this.handleValueChange}
                                             name='peso'
                                             value={this.state.visits[this.state.visit].peso}
                                             />
                                     </div>
+                                    
                                     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                         <FieldGroup
                                             id="pesoInput"
                                             type="number"
-                                            label="Altura"
-                                            placeholder="Altura"
+                                            label="Altura (cm)"
+                                            placeholder="Altura (cm)"
                                             onChange={this.handleValueChange}
                                             name='altura'
                                             value={this.state.visits[this.state.visit].altura}
@@ -539,6 +598,7 @@ export default class Detail extends React.Component {
                                             type="number"
                                             label="IMC"
                                             placeholder="IMC"
+                                            disabled="disabled"
                                             onChange={this.handleValueChange}
                                             name='IMC'
                                             value={this.state.visits[this.state.visit].IMC}
@@ -649,15 +709,14 @@ export default class Detail extends React.Component {
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <FieldGroup
-                                            id="cual_IECAInput"
-                                            type="text"
-                                            label="Cual IECA"
-                                            placeholder="Cual IECA"
+                                        <SelectFieldGroup
+                                            id="tipo_predef_IECA_Input" 
+                                            label="Tipo IECA"
+                                            value={this.state.visits[this.state.visit].tipo_predef_IECA} 
                                             onChange={this.handleValueChange}
-                                            name='cual_IECA'
-                                            value={this.state.visits[this.state.visit].cual_IECA}
-                                        />
+                                            name='tipo_predef_IECA'
+                                            options={dictionaryOptionsLists.tipo_predef_IECA}
+                                            />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
                                         <FieldGroup
@@ -683,15 +742,14 @@ export default class Detail extends React.Component {
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <FieldGroup
-                                            id="cual_ARA_IIInput"
-                                            type="text"
-                                            label="Cual ARA II"
-                                            placeholder="Cual ARA II"
+                                        <SelectFieldGroup
+                                            id="tipo_predef_ARA_IIInput" 
+                                            label="Tipo ARA II"
+                                            value={this.state.visits[this.state.visit].tipo_predef_ARA_II} 
                                             onChange={this.handleValueChange}
-                                            name='cual_ARA_II'
-                                            value={this.state.visits[this.state.visit].cual_ARA_II}
-                                        />
+                                            name='tipo_predef_ARA_II'
+                                            options={dictionaryOptionsLists.tipo_predef_ARA_II}
+                                            />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
                                         <FieldGroup
@@ -717,15 +775,14 @@ export default class Detail extends React.Component {
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <FieldGroup
-                                            id="cual_DIU_TIAZInput"
-                                            type="text"
-                                            label="Cual DIU TIAZ"
-                                            placeholder="Cual DIU TIAZ"
+                                        <SelectFieldGroup
+                                            id="tipo_predef_DIU_TIAZInput" 
+                                            label="Tipo DIU TIAZ"
+                                            value={this.state.visits[this.state.visit].tipo_predef_DIU_TIAZ} 
                                             onChange={this.handleValueChange}
-                                            name='cual_DIU_TIAZ'
-                                            value={this.state.visits[this.state.visit].cual_DIU_TIAZ}
-                                        />
+                                            name='tipo_predef_DIU_TIAZ'
+                                            options={dictionaryOptionsLists.tipo_predef_DIU_TIAZ}
+                                            />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
                                         <FieldGroup
@@ -751,15 +808,14 @@ export default class Detail extends React.Component {
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <FieldGroup
-                                            id="cual_ACA_DHPInput"
-                                            type="text"
-                                            label="Cual ACA DHP"
-                                            placeholder="Cual ACA DHP"
+                                        <SelectFieldGroup
+                                            id="tipo_predef_ACA_DHP_Input" 
+                                            label="Tipo ACA DHP"
+                                            value={this.state.visits[this.state.visit].tipo_predef_ACA_DHP} 
                                             onChange={this.handleValueChange}
-                                            name='cual_ACA_DHP'
-                                            value={this.state.visits[this.state.visit].cual_ACA_DHP}
-                                        />
+                                            name='tipo_predef_ACA_DHP'
+                                            options={dictionaryOptionsLists.tipo_predef_ACA_DHP}
+                                            />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
                                         <FieldGroup
@@ -910,15 +966,14 @@ export default class Detail extends React.Component {
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <FieldGroup
-                                            id="cual_diu_asa_nput"
-                                            type="text"
-                                            label="Cual DIU ASA"
-                                            placeholder="Cual DIU ASA"
+                                        <SelectFieldGroup
+                                            id="tipo_predef_diu_asa_Input" 
+                                            label="Tipo Diu ASA"
+                                            value={this.state.visits[this.state.visit].tipo_predef_diu_asa} 
                                             onChange={this.handleValueChange}
-                                            name='cual_diu_asa'
-                                            value={this.state.visits[this.state.visit].cual_diu_asa}
-                                        />
+                                            name='tipo_predef_diu_asa'
+                                            options={dictionaryOptionsLists.tipo_predef_diu_asa}
+                                            />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
                                         <FieldGroup
@@ -929,6 +984,40 @@ export default class Detail extends React.Component {
                                             onChange={this.handleValueChange}
                                             name='dosis_diu_asa'
                                             value={this.state.visits[this.state.visit].dosis_diu_asa}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="diu_aho_k_input" 
+                                            label="DIU Ahorrador Potasio"
+                                            value={this.state.visits[this.state.visit].diu_aho_k} 
+                                            onChange={this.handleValueChange}
+                                            name='diu_aho_k'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="tipo_predef_aho_k_Input" 
+                                            label="Tipo Ahorrador Potasio"
+                                            value={this.state.visits[this.state.visit].tipo_predef_aho_k} 
+                                            onChange={this.handleValueChange}
+                                            name='tipo_predef_aho_k'
+                                            options={dictionaryOptionsLists.tipo_predef_aho_k}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="dosis_diu_aho_k_input"
+                                            type="number"
+                                            label="Dosis Ahorrador Potasio"
+                                            placeholder="Dosis Ahorrador Potasio"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='dosis_diu_aho_k'
+                                            value={this.state.visits[this.state.visit].dosis_diu_aho_k}
                                         />
                                     </div>
                                 </div>
@@ -955,27 +1044,7 @@ export default class Detail extends React.Component {
                                         />
                                     </div>
                                 </div>
-                                <div className='row'>    
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="AAS_input" 
-                                            label="AAS"
-                                            value={this.state.visits[this.state.visit].AAS} 
-                                            onChange={this.handleValueChange}
-                                            name='AAS'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="clopidogrel_input" 
-                                            label="Clopidogrel"
-                                            value={this.state.visits[this.state.visit].clopidogrel} 
-                                            onChange={this.handleValueChange}
-                                            name='clopidogrel'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
+                                <div className="row">
                                     <div className="col-xs-12 col-sm-6 col-md-4">
                                         <SelectFieldGroup
                                             id="ACO_input" 
@@ -988,6 +1057,29 @@ export default class Detail extends React.Component {
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
                                         <SelectFieldGroup
+                                            id="tipo_predef_acos_Input" 
+                                            label="Tipo ACO"
+                                            value={this.state.visits[this.state.visit].tipo_predef_acos} 
+                                            onChange={this.handleValueChange}
+                                            name='tipo_predef_acos'
+                                            options={dictionaryOptionsLists.tipo_predef_acos}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <FieldGroup
+                                            id="dosis_acos_input"
+                                            type="number"
+                                            label="Dosis ACO"
+                                            placeholder="Dosis ACO"
+                                            onChange={this.handleValueChange}
+                                            name='dosis_acos'
+                                            value={this.state.visits[this.state.visit].dosis_acos}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
                                             id="ESTATINAS_input" 
                                             label="Estatinas"
                                             value={this.state.visits[this.state.visit].ESTATINAS} 
@@ -998,75 +1090,27 @@ export default class Detail extends React.Component {
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
                                         <SelectFieldGroup
-                                            id="METFORMINA_input" 
-                                            label="Metformina"
-                                            value={this.state.visits[this.state.visit].METFORMINA} 
+                                            id="tipo_predef_estatinas_Input" 
+                                            label="Tipo Estatinas"
+                                            value={this.state.visits[this.state.visit].tipo_predef_estatinas} 
                                             onChange={this.handleValueChange}
-                                            name='METFORMINA'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            name='tipo_predef_estatinas'
+                                            options={dictionaryOptionsLists.tipo_predef_estatinas}
                                             />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="SFU_input" 
-                                            label="SFU"
-                                            value={this.state.visits[this.state.visit].SFU} 
+                                        <FieldGroup
+                                            id="dosis_estatinas_input"
+                                            type="number"
+                                            label="Dosis Estatinas"
+                                            placeholder="Dosis Estatinas"
                                             onChange={this.handleValueChange}
-                                            name='SFU'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
+                                            name='dosis_estatinas'
+                                            value={this.state.visits[this.state.visit].dosis_estatinas}
+                                        />
                                     </div>
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="GLICLAZ_input" 
-                                            label="GLICLAZ"
-                                            value={this.state.visits[this.state.visit].GLICLAZ} 
-                                            onChange={this.handleValueChange}
-                                            name='GLICLAZ'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="GLITAZONAS_input" 
-                                            label="GLITAZONAS"
-                                            value={this.state.visits[this.state.visit].GLITAZONAS} 
-                                            onChange={this.handleValueChange}
-                                            name='GLITAZONAS'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="IDPP4_input" 
-                                            label="IDPP4"
-                                            value={this.state.visits[this.state.visit].IDPP4} 
-                                            onChange={this.handleValueChange}
-                                            name='IDPP4'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="SGLT2_input" 
-                                            label="SGLT2"
-                                            value={this.state.visits[this.state.visit].SGLT2} 
-                                            onChange={this.handleValueChange}
-                                            name='SGLT2'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
-                                    
-                                    <div className="col-xs-12 col-sm-6 col-md-4">
-                                        <SelectFieldGroup
-                                            id="GLP1_input" 
-                                            label="GLP1"
-                                            value={this.state.visits[this.state.visit].GLP1} 
-                                            onChange={this.handleValueChange}
-                                            name='GLP1'
-                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
-                                            />
-                                    </div>
+                                </div>
+                                <div className='row'>
                                     <div className="col-xs-12 col-sm-6 col-md-4">
                                         <SelectFieldGroup
                                             id="INSULINA_input" 
@@ -1077,6 +1121,329 @@ export default class Detail extends React.Component {
                                             options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
                                             />
                                     </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="INSULINA_DOSIS_input"
+                                            type="number"
+                                            label="Dosis Insulina"
+                                            placeholder="Dosis Insulinao"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='INSULINA_DOSIS'
+                                            value={this.state.visits[this.state.visit].INSULINA_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="INSULINA_RAPIDA_input" 
+                                            label="Insulina Rápida"
+                                            value={this.state.visits[this.state.visit].INSULINA_RAPIDA} 
+                                            onChange={this.handleValueChange}
+                                            name='INSULINA_RAPIDA'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="INSULINA_RAPIDA_DOSIS_input"
+                                            type="number"
+                                            label="Dosis Insulina Rápida"
+                                            placeholder="Dosis Insulinao"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='INSULINA_RAPIDA_DOSIS'
+                                            value={this.state.visits[this.state.visit].INSULINA_RAPIDA_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="antiagregantes_input" 
+                                            label="Antiagregantes"
+                                            value={this.state.visits[this.state.visit].antiagregantes} 
+                                            onChange={this.handleValueChange}
+                                            name='antiagregantes'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <FieldGroup
+                                            id="tipo_antiagregantes_input"
+                                            label="Tipo Antiagregantes"
+                                            placeholder="Tipo Antiagregantes"
+                                            onChange={this.handleValueChange}
+                                            name='tipo_antiagregantes'
+                                            value={this.state.visits[this.state.visit].tipo_antiagregantes}
+                                        />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="dosis_antiagregantes_input"
+                                            type="number"
+                                            label="Dosis Antiagregantes"
+                                            placeholder="Dosis Antiagregantes"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='dosis_antiagregantes'
+                                            value={this.state.visits[this.state.visit].dosis_antiagregantes}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="AAS_input" 
+                                            label="AAS"
+                                            value={this.state.visits[this.state.visit].AAS} 
+                                            onChange={this.handleValueChange}
+                                            name='AAS'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="AAS_input"
+                                            type="number"
+                                            label="Dosis AAS"
+                                            placeholder="Dosis AAS"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='AAS_DOSIS'
+                                            value={this.state.visits[this.state.visit].AAS_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="clopidogrel_input" 
+                                            label="Clopidogrel"
+                                            value={this.state.visits[this.state.visit].clopidogrel} 
+                                            onChange={this.handleValueChange}
+                                            name='clopidogrel'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="clopidogrel_dosis_input"
+                                            type="number"
+                                            label="Dosis Clopidogrel"
+                                            placeholder="Dosis Clopidogrel"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='clopidogrel_dosis'
+                                            value={this.state.visits[this.state.visit].clopidogrel_dosis}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>                                        
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="METFORMINA_input" 
+                                            label="Metformina"
+                                            value={this.state.visits[this.state.visit].METFORMINA} 
+                                            onChange={this.handleValueChange}
+                                            name='METFORMINA'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="METFORMINA_DOSIS_input"
+                                            type="number"
+                                            label="Dosis Metformina"
+                                            placeholder="Dosis Metformina"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='METFORMINA_DOSIS'
+                                            value={this.state.visits[this.state.visit].METFORMINA_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="SFU_input" 
+                                            label="SFU"
+                                            value={this.state.visits[this.state.visit].SFU} 
+                                            onChange={this.handleValueChange}
+                                            name='SFU'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="SFU_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis SFU"
+                                            placeholder="Dosis SFU"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='SFU_DOSIS'
+                                            value={this.state.visits[this.state.visit].SFU_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="GLICLAZ_input" 
+                                            label="GLICLAZ"
+                                            value={this.state.visits[this.state.visit].GLICLAZ} 
+                                            onChange={this.handleValueChange}
+                                            name='GLICLAZ'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="GLICLAZ_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis GLICLAZ"
+                                            placeholder="Dosis GLICLAZ"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='GLICLAZ_DOSIS'
+                                            value={this.state.visits[this.state.visit].GLICLAZ_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>                                        
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="GLITAZONAS_input" 
+                                            label="GLITAZONAS"
+                                            value={this.state.visits[this.state.visit].GLITAZONAS} 
+                                            onChange={this.handleValueChange}
+                                            name='GLITAZONAS'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="GLITAZONAS_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis GLITAZONAS"
+                                            placeholder="Dosis GLITAZONAS"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='GLITAZONAS_DOSIS'
+                                            value={this.state.visits[this.state.visit].GLITAZONAS_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>                                        
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="IDPP4_input" 
+                                            label="IDPP4"
+                                            value={this.state.visits[this.state.visit].IDPP4} 
+                                            onChange={this.handleValueChange}
+                                            name='IDPP4'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="IDPP4_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis IDPP4"
+                                            placeholder="Dosis IDPP4"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='IDPP4_DOSIS'
+                                            value={this.state.visits[this.state.visit].IDPP4_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>    
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="SGLT2_input" 
+                                            label="SGLT2"
+                                            value={this.state.visits[this.state.visit].SGLT2} 
+                                            onChange={this.handleValueChange}
+                                            name='SGLT2'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="SGLT2_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis SGLT2"
+                                            placeholder="Dosis SGLT2"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='SGLT2_DOSIS'
+                                            value={this.state.visits[this.state.visit].SGLT2_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>        
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="GLP1_input" 
+                                            label="GLP1"
+                                            value={this.state.visits[this.state.visit].GLP1} 
+                                            onChange={this.handleValueChange}
+                                            name='GLP1'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="GLP1_DOSIS_Input"
+                                            type="number"
+                                            label="Dosis GLP1"
+                                            placeholder="Dosis GLP1"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='GLP1_DOSIS'
+                                            value={this.state.visits[this.state.visit].GLP1_DOSIS}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className='row'>        
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="ezetimibe_input" 
+                                            label="Ezetimibe"
+                                            value={this.state.visits[this.state.visit].ezetimibe} 
+                                            onChange={this.handleValueChange}
+                                            name='ezetimibe'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-sm-offset-6 col-md-offset-0 col-md-4">
+                                        <FieldGroup
+                                            id="ezetimibe_dosis_Input"
+                                            type="number"
+                                            label="Dosis Ezetimibe"
+                                            placeholder="Dosis Ezetimibe"
+                                            help="Dosis en mg del fármaco en cuestión cada 24h"
+                                            onChange={this.handleValueChange}
+                                            name='ezetimibe_dosis'
+                                            value={this.state.visits[this.state.visit].ezetimibe_dosis}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>     
+                                    <div className="col-xs-12 col-sm-6 col-md-4">
+                                        <SelectFieldGroup
+                                            id="fibratos_input" 
+                                            label="Fibratos"
+                                            value={this.state.visits[this.state.visit].fibratos} 
+                                            onChange={this.handleValueChange}
+                                            name='fibratos'
+                                            options={[{value: 1, label: "Si"}, {value: 0, label: "No"}]}
+                                            />
+                                    </div>   
                                     <div className="col-xs-12 col-sm-6 col-md-4">
                                         <SelectFieldGroup
                                             id="test_morisky_green_input" 
@@ -1231,7 +1598,7 @@ export default class Detail extends React.Component {
                                     <FieldGroup
                                         id="P_alturaInput"
                                         type="number"
-                                        label="P Altura (mm)"
+                                        label="Altura de P en II (mm)"
                                         placeholder="P Altura (mm)"
                                         onChange={this.handleValueChange}
                                         name='P_altura'
@@ -1239,9 +1606,20 @@ export default class Detail extends React.Component {
                                         />
                                 </div>
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <FieldGroup
+                                        id="P_anchuraInput"
+                                        type="number"
+                                        label="Anchura de P en II (mm)"
+                                        placeholder="P Anchura (mm)"
+                                        onChange={this.handleValueChange}
+                                        name='P_anchura'
+                                        value={this.state.visits[this.state.visit].P_anchura}
+                                        />
+                                </div>
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
                                         id="P_melladaInput" 
-                                        label="P Mellada"
+                                        label="P Mellada en II"
                                         value={this.state.visits[this.state.visit].P_mellada} 
                                         onChange={this.handleValueChange}
                                         name='P_mellada'
@@ -1557,6 +1935,7 @@ export default class Detail extends React.Component {
                                         placeholder="Indice de Sokolow-Lyon"
                                         onChange={this.handleValueChange}
                                         name='Sokolow'
+                                        help="Suma de la onda S en V1 y onda R en V5 o V6 >/= 3,5 mV (35 mm)"
                                         value={this.state.visits[this.state.visit].Sokolow}
                                     />
                                 </div> 
@@ -1569,6 +1948,7 @@ export default class Detail extends React.Component {
                                         placeholder="Indice de Cornell"
                                         onChange={this.handleValueChange}
                                         name='Cornell'
+                                        help='Hombres: S en V3 + R en aVL >2,8 mV (28 mm) - Mujeres: S en V3 + R en aVL >2,0 mV (20 mm)'
                                         value={this.state.visits[this.state.visit].Cornell}
                                     />
                                 </div> 
@@ -1626,11 +2006,11 @@ export default class Detail extends React.Component {
                             <div className="row">    
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
-                                        id="t_cara_inferior_Input" 
-                                        label="T Cara Inferior (II, III y AVF)"
-                                        value={this.state.visits[this.state.visit].t_cara_inferior} 
+                                        id="t_en_I_Input" 
+                                        label="T en I"
+                                        value={this.state.visits[this.state.visit].t_en_I} 
                                         onChange={this.handleValueChange}
-                                        name='t_cara_inferior'
+                                        name='t_en_I'
                                         options={[
                                             {value: 0, label: ""},
                                             {value: 1, label: "Positiva"},
@@ -1642,11 +2022,11 @@ export default class Detail extends React.Component {
                                 </div> 
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
-                                        id="t_cara_lateral_Input" 
-                                        label="T Cara Lateral (I y AVL)"
-                                        value={this.state.visits[this.state.visit].t_cara_lateral} 
+                                        id="t_en_II_Input" 
+                                        label="T en II"
+                                        value={this.state.visits[this.state.visit].t_en_II} 
                                         onChange={this.handleValueChange}
-                                        name='t_cara_lateral'
+                                        name='t_en_II'
                                         options={[
                                             {value: 0, label: ""},
                                             {value: 1, label: "Positiva"},
@@ -1658,11 +2038,11 @@ export default class Detail extends React.Component {
                                 </div> 
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
-                                        id="t_cara_septal_Input" 
-                                        label="T Cara Septal (V1, V2)"
-                                        value={this.state.visits[this.state.visit].t_cara_septal} 
+                                        id="t_en_III_Input" 
+                                        label="T en III"
+                                        value={this.state.visits[this.state.visit].t_en_III} 
                                         onChange={this.handleValueChange}
-                                        name='t_cara_septal'
+                                        name='t_en_III'
                                         options={[
                                             {value: 0, label: ""},
                                             {value: 1, label: "Positiva"},
@@ -1674,11 +2054,11 @@ export default class Detail extends React.Component {
                                 </div> 
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
-                                        id="t_cara_anterior_Input" 
-                                        label="T Cara Anterior (V3, V4)"
-                                        value={this.state.visits[this.state.visit].t_cara_anterior} 
+                                        id="t_en_AVL_Input" 
+                                        label="T en AVL"
+                                        value={this.state.visits[this.state.visit].t_en_AVL} 
                                         onChange={this.handleValueChange}
-                                        name='t_cara_anterior'
+                                        name='t_en_AVL'
                                         options={[
                                             {value: 0, label: ""},
                                             {value: 1, label: "Positiva"},
@@ -1688,14 +2068,13 @@ export default class Detail extends React.Component {
                                         ]}
                                         />   
                                 </div> 
-
                                 <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <SelectFieldGroup
-                                        id="t_cara_lateral_alta_Input" 
-                                        label="T Cara Lateral Alta (V5, V6)"
-                                        value={this.state.visits[this.state.visit].t_cara_lateral_alta} 
+                                        id="t_en_AVF_Input" 
+                                        label="T en AVF"
+                                        value={this.state.visits[this.state.visit].t_en_AVF} 
                                         onChange={this.handleValueChange}
-                                        name='t_cara_lateral_alta'
+                                        name='t_en_AVF'
                                         options={[
                                             {value: 0, label: ""},
                                             {value: 1, label: "Positiva"},
@@ -1705,6 +2084,130 @@ export default class Detail extends React.Component {
                                         ]}
                                         />   
                                 </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_AVR_Input" 
+                                        label="T en AVR"
+                                        value={this.state.visits[this.state.visit].t_en_AVR} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_AVR'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V1_Input" 
+                                        label="T V1 (Cara Septal)"
+                                        value={this.state.visits[this.state.visit].t_en_V1} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V1'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V2_Input" 
+                                        label="T V2 (Cara Septal)"
+                                        value={this.state.visits[this.state.visit].t_en_V2} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V2'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V3_Input" 
+                                        label="T V3 (Cara Anterior)"
+                                        value={this.state.visits[this.state.visit].t_en_V3} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V3'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V4_Input" 
+                                        label="T V4 (Cara Anterior)"
+                                        value={this.state.visits[this.state.visit].t_en_V4} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V4'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V5_Input" 
+                                        label="T V5 (Cara Lateral)"
+                                        value={this.state.visits[this.state.visit].t_en_V5} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V5'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <SelectFieldGroup
+                                        id="t_en_V6_Input" 
+                                        label="T V6 (Cara Lateral)"
+                                        value={this.state.visits[this.state.visit].t_en_V6} 
+                                        onChange={this.handleValueChange}
+                                        name='t_en_V6'
+                                        options={[
+                                            {value: 0, label: ""},
+                                            {value: 1, label: "Positiva"},
+                                            {value: 2, label: "Plana"},
+                                            {value: 3, label: "Negativa asimétrica"},
+                                            {value: 4, label: "Negativa simétrica"},
+                                        ]}
+                                        />   
+                                </div> 
+                                <div className="col-xs-12">
+                                    <FieldGroup
+                                        id="observaciones_textarea"
+                                        componentClass="textarea"
+                                        rows="8"
+                                        label="Observaciones"
+                                        placeholder="Observaciones"
+                                        onChange={this.handleValueChange}
+                                        name='observaciones'
+                                        value={this.state.visits[this.state.visit].observaciones}
+                                    />
+                                </div>
                             </div>   
                         </div>                
                         )}
@@ -1851,19 +2354,12 @@ export default class Detail extends React.Component {
                                     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                         <SelectFieldGroup
                                             id="Dgtco_HTA_input" 
-                                            label="Diagnótico HTA"
+                                            label="Diagnóstico HTA"
                                             help="¿Cómo se realizó el diagnóstico?"
                                             value={this.state.visits[this.state.visit].Dgtco_HTA} 
                                             onChange={this.handleValueChange}
                                             name='Dgtco_HTA'
-                                            options={[
-                                                {value: 0, label: "Asintomático, esencial"},
-                                                {value: 1, label: "Cefalea"},
-                                                {value: 2, label: "Insuficiencia cardiaca"},
-                                                {value: 3, label: "ECG alterado"},
-                                                {value: 4, label: "Cardiopatía isquémica"},
-                                                {value: 5, label: "Tras AVC"},
-                                            ]}
+                                            options={dictionaryOptionsLists.Dgtco_HTA}
                                         />
                                     </div>
                                     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -1973,6 +2469,31 @@ export default class Detail extends React.Component {
                                             onChange={
                                                 (isoString) => {
                                                     this.setDateTimeValueCurrentVisit('fecha_dgtco_IC', isoString);
+                                                }}
+                                            />    
+                                    </div>
+                                </div>
+                                <div className="row"> 
+                                    <div className="col-xs-12 col-sm-6 col-lg-3">
+                                        <SelectFieldGroup
+                                            id="IC_input" 
+                                            label="TEP"
+                                            value={this.state.visits[this.state.visit].tep} 
+                                            onChange={this.handleValueChange}
+                                            name='IC'
+                                            options={[
+                                                {value: 0, label: "No"},
+                                                {value: 1, label: "Sí"},
+                                            ]}
+                                        />
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6 col-lg-3">
+                                        <DatePicker 
+                                            label="Fecha de suceso TEP"
+                                            value={this.state.visits[this.state.visit].fecha_suceso_tep} 
+                                            onChange={
+                                                (isoString) => {
+                                                    this.setDateTimeValueCurrentVisit('fecha_suceso_tep', isoString);
                                                 }}
                                             />    
                                     </div>
@@ -2314,6 +2835,7 @@ export default class Detail extends React.Component {
                                         placeholder="FG"
                                         onChange={this.handleValueChange}
                                         name='FG'
+                                        disabled="disabled"
                                         value={this.state.visits[this.state.visit].FG}
                                     />
                                 </div>
@@ -2713,9 +3235,9 @@ export default class Detail extends React.Component {
                                     <SelectFieldGroup
                                         id="proteinuria_input" 
                                         label="Proteinuria"
-                                        value={this.state.visits[this.state.visit].proteinuria} 
+                                        value={this.state.visits[this.state.visit].proteinuria_pruebas} 
                                         onChange={this.handleValueChange}
-                                        name='proteinuria'
+                                        name='proteinuria_pruebas'
                                         options={[
                                             {value: 0, label: "Negativo"},
                                             {value: 1, label: "Microalbuminuria"},
@@ -2726,6 +3248,25 @@ export default class Detail extends React.Component {
                                 </div>
                             </div>
                         </div>
+                        )}
+                        {this.state.tabkey === "7" && (
+                            /* PLAN ESPECÍFICO CON EL PACIENTE */
+                            <div className="tab-content">
+                                <div className='row'>
+                                    <div className="col-xs-12">
+                                        <FieldGroup
+                                            id="plan_paciente_textarea"
+                                            componentClass="textarea"
+                                            rows="15"
+                                            label="Plan específico con el paciente"
+                                            placeholder="Plan específico con el paciente"
+                                            onChange={this.handleValueChange}
+                                            name='plan_paciente'
+                                            value={this.state.visits[this.state.visit].plan_paciente}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         )}
                         
                     </div>
